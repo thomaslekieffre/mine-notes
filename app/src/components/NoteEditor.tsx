@@ -11,6 +11,10 @@ import { SearchBar } from './SearchBar'
 import { Outline } from './Outline'
 import { Backlinks } from './Backlinks'
 import { MathDialog } from './MathDialog'
+import { PenLayer } from './PenLayer'
+import type { PenSettings } from './PenLayer'
+import { ReadingBar } from './ReadingBar'
+import { useReading } from '../store/reading'
 import type { Node as PMNode } from '@tiptap/pm/model'
 import type { SlashItem } from '../extensions/SlashCommand'
 import { SlashCommand } from '../extensions/SlashCommand'
@@ -41,6 +45,10 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
   typesRef.current = types
   const [slash, setSlash] = useState<SlashState | null>(null)
   const [typesOpen, setTypesOpen] = useState(false)
+  const reading = useReading()
+  const [scroller, setScroller] = useState<HTMLDivElement | null>(null)
+  const [pen, setPen] = useState<PenSettings>({ on: false, color: '--c-red', tool: 'pen', fade: true })
+  const [clearSignal, setClearSignal] = useState(0)
   const [wiki, setWiki] = useState<SlashState | null>(null)
   const [searchOpen, setSearchOpen] = useState(false)
   const [outlineOpen, setOutlineOpen] = useState(false)
@@ -150,6 +158,11 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
   }, [editor])
 
   useEffect(() => {
+    editor?.setEditable(!reading)
+    if (!reading) setPen((p) => ({ ...p, on: false }))
+  }, [editor, reading])
+
+  useEffect(() => {
     if (!editor) return
     const count = () => {
       const t = editor.getText().trim()
@@ -165,21 +178,22 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
 
   return (
     <>
-      {editor && !todoMode && (
+      {editor && !todoMode && !reading && (
         <Toolbar
           editor={editor}
           onToggleOutline={() => setOutlineOpen((v) => !v)}
           onToggleSearch={() => setSearchOpen((v) => !v)}
         />
       )}
-      <div className="doc-scroll">
-        <div className="doc-wrap">
+      <div className="doc-scroll" ref={setScroller}>
+        <div className={reading ? 'doc-wrap reading' : 'doc-wrap'}>
           {crumbs && <div className="crumbs">{crumbs}</div>}
           <input
             className="doc-title"
             value={node.name}
             placeholder="Sans titre"
             aria-label="Titre de la note"
+            readOnly={reading}
             onChange={(e) => renameNode(node.id, e.target.value)}
             onBlur={(e) => {
               if (!e.target.value.trim()) renameNode(node.id, 'Sans titre')
@@ -194,7 +208,7 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
           <EditorContent editor={editor} />
           {todoMode && <div className="todo-hint">↩ nouvelle tâche · <kbd>[[</kbd> lier une page ou en créer une</div>}
           <Backlinks noteId={node.id} nodes={nodes} />
-          {editor && (
+          {editor && !reading && (
             <DragHandle editor={editor} nested>
               <span className="drag-grip" title="Glisser pour déplacer ce bloc (ou Alt+↑ / Alt+↓)">
                 ⋮⋮
@@ -203,6 +217,10 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
           )}
         </div>
       </div>
+      {reading && (
+        <ReadingBar pen={pen} onPen={(patch) => setPen((p) => ({ ...p, ...patch }))} onClear={() => setClearSignal((n) => n + 1)} />
+      )}
+      {reading && scroller && <PenLayer scroller={scroller} pen={pen} clearSignal={clearSignal} />}
       {searchOpen && editor && <SearchBar editor={editor} onClose={() => { setSearchOpen(false); editor.commands.focus() }} />}
       {outlineOpen && editor && <Outline editor={editor} onClose={() => setOutlineOpen(false)} />}
       {math && editor && (

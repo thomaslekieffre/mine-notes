@@ -9,6 +9,7 @@ export type ShortcutId =
   | 'settings'
   | 'rename'
   | 'findInNote'
+  | 'readMode'
   | 'blockUp'
   | 'blockDown'
   | 'quickNote'
@@ -31,6 +32,7 @@ export const SHORTCUTS: ShortcutDef[] = [
   { id: 'settings', label: 'Réglages', group: 'Navigation', default: 'Command+,' },
   { id: 'rename', label: 'Renommer', hint: "L'élément sélectionné dans l'arborescence", group: 'Navigation', default: 'F2' },
   { id: 'findInNote', label: 'Rechercher dans la note', group: 'Édition', default: 'Command+F' },
+  { id: 'readMode', label: 'Mode lecture', hint: 'Bloque l’écriture et active le stylo pour réviser', group: 'Édition', default: 'Command+E' },
   { id: 'blockUp', label: 'Monter le bloc', group: 'Édition', default: 'Alt+ArrowUp' },
   { id: 'blockDown', label: 'Descendre le bloc', group: 'Édition', default: 'Alt+ArrowDown' },
   { id: 'quickNote', label: 'Écrire une note', hint: 'Marche partout sur le Mac, même quand Mine est en arrière-plan', group: 'Capture rapide', default: 'Control+Alt+N', global: true },

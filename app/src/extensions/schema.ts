@@ -47,7 +47,7 @@ export function buildExtensions(todo = false) {
     FontSize,
     Highlight.configure({ multicolor: true }),
     TaskList,
-    TaskItem.configure({ nested: true }),
+    TaskItem.configure({ nested: true, onReadOnlyChecked: () => true }),
     ImageBlock,
     Diagram,
     Table.configure({ resizable: true }),

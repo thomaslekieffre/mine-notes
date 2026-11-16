@@ -12,6 +12,7 @@ import { restoreNode } from './store/tree'
 import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
 import { QuickCapture } from './components/QuickCapture'
+import { toggleReading } from './store/reading'
 import { createDemo } from './store/demo'
 import type { QuickMode } from './components/QuickCapture'
 import { matches, pretty, toGlobalAccel, useShortcuts } from './store/shortcuts'
@@ -217,6 +218,9 @@ export default function App() {
       } else if (matches('closeTab', e) && ui.activeId) {
         e.preventDefault()
         closeTab(ui.activeId)
+      } else if (matches('readMode', e)) {
+        e.preventDefault()
+        toggleReading()
       } else if (matches('settings', e)) {
         e.preventDefault()
         setSettingsOpen(true)
