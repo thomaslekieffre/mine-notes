@@ -5,3 +5,4 @@ dist
 app/public/excalidraw-assets
 app/src-tauri/target
 app/src-tauri/gen
+app/public/mathlive

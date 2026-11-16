@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import katex from 'katex'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
+import type { MathfieldElement } from 'mathlive'
 
 interface Props {
   kind: 'inline' | 'block'
@@ -11,25 +11,68 @@ interface Props {
   onClose: () => void
 }
 
-/** Saisie d'une formule LaTeX avec aperçu en direct. */
+const TIPS: [string, string][] = [
+  ['1/3', 'fraction'],
+  ['x^2', 'puissance'],
+  ['x_1', 'indice'],
+  ['sqrt', 'racine'],
+  ['pi', 'π'],
+  ['alpha', 'α'],
+  ['sum', 'Σ'],
+  ['int', '∫'],
+  ['<=', '≤'],
+  ['->', '→'],
+]
+
+/** Saisie visuelle d'une formule (MathLive) : on tape « 1/3 » et ça devient une vraie fraction. */
 export function MathDialog({ kind, initial, editing, onSubmit, onDelete, onClose }: Props) {
+  const host = useRef<HTMLDivElement>(null)
+  const field = useRef<MathfieldElement | null>(null)
   const [latex, setLatex] = useState(initial)
-  const ref = useRef<HTMLTextAreaElement>(null)
+  const [raw, setRaw] = useState(false)
+  const latexRef = useRef(initial)
+  latexRef.current = latex
+
   useEffect(() => {
-    ref.current?.focus()
-    ref.current?.select()
+    let alive = true
+    let el: MathfieldElement | null = null
+    void import('mathlive').then(({ MathfieldElement }) => {
+      if (!alive || !host.current) return
+      MathfieldElement.fontsDirectory = '/mathlive/fonts'
+      MathfieldElement.soundsDirectory = null
+      el = new MathfieldElement()
+      el.mathVirtualKeyboardPolicy = 'manual'
+      el.value = initial
+      el.setAttribute('aria-label', 'Formule')
+      el.addEventListener('input', () => setLatex(el!.value))
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation()
+          onClose()
+        } else if (e.key === 'Enter') {
+          e.preventDefault()
+          e.stopPropagation()
+          const v = el!.value.trim()
+          if (v) onSubmit(v)
+          else onClose()
+        }
+      })
+      host.current.appendChild(el)
+      field.current = el
+      setTimeout(() => el?.focus(), 30)
+    })
+    return () => {
+      alive = false
+      el?.remove()
+      field.current = null
+      window.mathVirtualKeyboard?.hide()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const html = useMemo(() => {
-    try {
-      return katex.renderToString(latex || '\;', { displayMode: kind === 'block', throwOnError: false })
-    } catch {
-      return ''
-    }
-  }, [latex, kind])
-
   const submit = () => {
-    if (latex.trim()) onSubmit(latex.trim())
+    const v = latexRef.current.trim()
+    if (v) onSubmit(v)
     else onClose()
   }
 
@@ -42,28 +85,44 @@ export function MathDialog({ kind, initial, editing, onSubmit, onDelete, onClose
             <Icon name="x" />
           </button>
         </div>
-        <p>
-          Écris en LaTeX, par exemple <kbd>\frac{'{a}{b}'}</kbd>, <kbd>\sqrt{'{x}'}</kbd>, <kbd>\sum_{'{i=1}^{n}'}</kbd>,{' '}
-          <kbd>\int_0^1</kbd>.
-        </p>
-        <textarea
-          ref={ref}
-          className="math-input"
-          value={latex}
-          aria-label="Formule LaTeX"
-          rows={3}
-          spellCheck={false}
-          placeholder="x^2 + y^2 = r^2"
-          onChange={(e) => setLatex(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') onClose()
-            if (e.key === 'Enter' && (e.metaKey || e.ctrlKey || kind === 'inline')) {
-              e.preventDefault()
-              submit()
-            }
-          }}
-        />
-        <div className="math-preview" dangerouslySetInnerHTML={{ __html: html }} />
+        <p>Tape directement, comme au clavier. Les raccourcis se transforment tout seuls :</p>
+        <div className="math-tips">
+          {TIPS.map(([k, v]) => (
+            <span key={k}>
+              <kbd>{k}</kbd> {v}
+            </span>
+          ))}
+        </div>
+        <div ref={host} className="math-host" />
+        <div className="math-tools">
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              const kb = window.mathVirtualKeyboard
+              if (kb) kb.visible ? kb.hide() : kb.show()
+              field.current?.focus()
+            }}
+          >
+            Clavier visuel
+          </button>
+          <button type="button" className="btn" onClick={() => setRaw((v) => !v)}>
+            {raw ? 'Masquer le LaTeX' : 'Voir le LaTeX'}
+          </button>
+        </div>
+        {raw && (
+          <textarea
+            className="math-input"
+            value={latex}
+            aria-label="Code LaTeX"
+            rows={2}
+            spellCheck={false}
+            onChange={(e) => {
+              setLatex(e.target.value)
+              if (field.current) field.current.value = e.target.value
+            }}
+          />
+        )}
         <div className="dialog-actions">
           {editing && (
             <button type="button" className="btn danger" onClick={onDelete}>

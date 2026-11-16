@@ -15,3 +15,11 @@ for (const name of readdirSync(src)) {
   cpSync(join(src, name), join(dest, name), { recursive: true })
 }
 console.log('Polices Excalidraw copiées dans public/excalidraw-assets/fonts')
+
+// MathLive (saisie visuelle des formules) charge ses polices depuis un CDN par défaut : on les sert en local.
+const mlSrc = join(root, 'node_modules/mathlive/fonts')
+const mlDest = join(root, 'public/mathlive/fonts')
+rmSync(mlDest, { recursive: true, force: true })
+mkdirSync(mlDest, { recursive: true })
+cpSync(mlSrc, mlDest, { recursive: true })
+console.log('Polices MathLive copiées dans public/mathlive/fonts')
