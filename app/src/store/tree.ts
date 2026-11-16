@@ -16,6 +16,10 @@ export interface TreeNode {
   order: number
   /** Présent quand l'élément a été mis à la corbeille (date en ms). Ses enfants le suivent. */
   trashedAt?: number
+  /** Note du jour : date locale « AAAA-MM-JJ ». */
+  day?: string
+  /** Dossier qui range les notes du jour. */
+  daily?: boolean
 }
 
 interface TreeState {
@@ -72,7 +76,7 @@ export function useTree(): TreeState {
 
 function put(node: TreeNode) {
   const m = new Y.Map<unknown>()
-  for (const [k, v] of Object.entries(node)) m.set(k, v)
+  for (const [k, v] of Object.entries(node)) if (v !== undefined) m.set(k, v)
   yNodes.set(node.id, m)
 }
 
@@ -370,4 +374,35 @@ export function applyTreeUpdate(update: Uint8Array) {
 
 export function getTreeNodes(): TreeNode[] {
   return state.nodes
+}
+
+
+// ───── Note du jour ─────
+const pad = (n: number) => String(n).padStart(2, '0')
+export const dayKey = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+const dayTitle = (d: Date) => {
+  const t = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return t.charAt(0).toUpperCase() + t.slice(1)
+}
+
+/** Ouvre la note d'aujourd'hui : la crée (dans le dossier « Notes du jour ») si elle n'existe pas encore. */
+export function ensureDailyNote(d = new Date()): { noteId: string; folderId: string } {
+  const key = dayKey(d)
+  const visible = state.nodes
+  const existing = visible.find((n) => n.type === 'note' && n.day === key)
+  if (existing) return { noteId: existing.id, folderId: existing.parentId ?? '' }
+
+  const all = allNodes()
+  let folder = all.find((n) => n.type === 'folder' && n.daily)
+  if (folder?.trashedAt) {
+    restoreNode(folder.id)
+    folder = { ...folder, trashedAt: undefined }
+  }
+  const folderId = folder?.id ?? createNode(null, 'folder', 'Notes du jour')
+  if (!folder) yNodes.get(folderId)?.set('daily', true)
+
+  const noteId = crypto.randomUUID()
+  // Classées par date, les plus récentes en haut du dossier (ordre = date négative).
+  put({ id: noteId, parentId: folderId, type: 'note', kind: 'journal', name: dayTitle(d), order: -Number(key.replace(/-/g, '')), day: key })
+  return { noteId, folderId }
 }

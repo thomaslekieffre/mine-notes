@@ -37,6 +37,7 @@ interface Props {
 const SHORTCUTS: [string, string][] = [
   ['⌘P', 'Aller à une note / chercher dans le texte'],
   ['⌘N', 'Nouvelle note'],
+  ['⌘D', 'Note du jour'],
   ['⌘W', "Fermer l'onglet"],
   ['⌘,', 'Réglages'],
   ['F2', 'Renommer'],

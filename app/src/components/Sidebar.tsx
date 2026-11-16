@@ -22,6 +22,7 @@ interface Props {
   onDelete: (n: TreeNode) => void
   onOpenPalette: () => void
   onOpenTodos: () => void
+  onOpenToday: () => void
   onOpenSettings: () => void
   trashCount: number
   onOpenTrash: () => void
@@ -225,6 +226,12 @@ export function Sidebar(props: Props) {
         <Icon name="search" size={14} />
         <span className="grow">Aller à une note…</span>
         <kbd>⌘P</kbd>
+      </button>
+
+      <button type="button" className="row overview" style={{ margin: '0 6px 2px', paddingLeft: 8 }} onClick={props.onOpenToday} title="Note du jour (⌘D)">
+        <span className="chev-space" />
+        <Icon name="calendar" style={{ color: 'var(--ex)', flexShrink: 0 }} />
+        <span className="row-name">Note du jour</span>
       </button>
 
       <button

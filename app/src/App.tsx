@@ -12,7 +12,7 @@ import { restoreNode } from './store/tree'
 import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
 import { Mascot } from './components/Mascot'
-import { countDescendants, createNode, renameNode, trashNode, useTree } from './store/tree'
+import { countDescendants, createNode, ensureDailyNote, renameNode, trashNode, useTree } from './store/tree'
 import type { NodeType, NoteKind, TreeNode } from './store/tree'
 import { usePersistentState } from './store/usePersistentState'
 
@@ -130,6 +130,12 @@ export default function App() {
     (id: string) => setUi((u) => (u.expanded.includes(id) ? u : { ...u, expanded: [...u.expanded, id] })),
     [setUi],
   )
+  const openToday = useCallback(() => {
+    const { noteId, folderId } = ensureDailyNote()
+    if (folderId) expand(folderId)
+    openNote(noteId)
+  }, [expand, openNote])
+
   const toggle = useCallback(
     (id: string) =>
       setUi((u) => ({
@@ -204,6 +210,9 @@ export default function App() {
       } else if (mod && e.key.toLowerCase() === 'w' && ui.activeId) {
         e.preventDefault()
         closeTab(ui.activeId)
+      } else if (mod && e.key.toLowerCase() === 'd' && !e.shiftKey) {
+        e.preventDefault()
+        openToday()
       } else if (mod && e.key === ',') {
         e.preventDefault()
         setSettingsOpen(true)
@@ -214,7 +223,7 @@ export default function App() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [create, closeTab, ui.activeId, selectedId])
+  }, [create, closeTab, openToday, ui.activeId, selectedId])
 
   const cycleTheme = () =>
     setUi((u) => ({ ...u, theme: u.theme === 'system' ? 'light' : u.theme === 'light' ? 'dark' : 'system' }))
@@ -252,6 +261,7 @@ export default function App() {
         onDelete={setToDelete}
         onOpenPalette={() => setPaletteOpen(true)}
         onOpenTodos={() => openNote(TODO_VIEW)}
+        onOpenToday={openToday}
         todosActive={showTodos}
       />
       <div className="backdrop" onClick={() => setSidebarOpen(false)} />
