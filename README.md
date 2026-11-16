@@ -45,6 +45,14 @@ npx tauri build --bundles app     # Mine.app dans src-tauri/target/release/bundl
 
 Les données de l'app de bureau et celles du navigateur sont séparées.
 
+## Version
+
+Le numéro de version est celui de `app/package.json` (affiché dans les réglages). Pour le changer partout d'un coup (npm, Tauri, Cargo) :
+
+```bash
+cd app && npm run set-version -- 0.3.0
+```
+
 ## État
 
 Voir [PLAN.md](PLAN.md) pour la vision, les jalons et ce qui reste (synchronisation, PWA iPhone).
