@@ -93,6 +93,25 @@ export function TodoOverview({ nodes, onOpen }: Props) {
                 <label key={`${g.node.id}-${i}`} className={t.checked ? 'todo-row done' : 'todo-row'}>
                   <input type="checkbox" checked={t.checked} onChange={() => t.toggle()} />
                   <span>{t.text || '(vide)'}</span>
+                  {t.links.map((l, k) => {
+                    const target = byId.get(l.id)
+                    return (
+                      <button
+                        key={k}
+                        type="button"
+                        className={target ? 'note-link' : 'note-link broken'}
+                        title={target ? 'Ouvrir la page' : 'Page supprimée'}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          if (target) onOpen(target.id)
+                        }}
+                      >
+                        <Icon name="file" size={12} />
+                        {target?.name ?? l.label}
+                      </button>
+                    )
+                  })}
                 </label>
               ))}
             </section>

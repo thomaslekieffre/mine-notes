@@ -17,11 +17,16 @@ import { NoteLink } from './NoteLink'
 import { EmojiShortcodes } from './EmojiShortcodes'
 import { MarkdownPaste } from './MarkdownPaste'
 import { mathBridge } from './mathBridge'
+import { Document } from '@tiptap/extension-document'
+
+/** Document d'une note de todo : une seule liste de cases à cocher. */
+const TodoDocument = Document.extend({ content: 'taskList' })
 
 /** Tout ce qui définit la structure d'une note (utilisé par l'éditeur et par l'export). */
-export function buildExtensions() {
+export function buildExtensions(todo = false) {
   return [
-    StarterKit.configure({ undoRedo: false, codeBlock: false }),
+    StarterKit.configure({ undoRedo: false, codeBlock: false, ...(todo ? { document: false as const } : {}) }),
+    ...(todo ? [TodoDocument] : []),
     CodeBlock,
     Mathematics.configure({
       katexOptions: { throwOnError: false },

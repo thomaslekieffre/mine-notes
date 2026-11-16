@@ -11,6 +11,7 @@ import { Outline } from './Outline'
 import { Backlinks } from './Backlinks'
 import { MathDialog } from './MathDialog'
 import type { Node as PMNode } from '@tiptap/pm/model'
+import type { SlashItem } from '../extensions/SlashCommand'
 import { SlashCommand } from '../extensions/SlashCommand'
 import type { SlashState } from '../extensions/SlashCommand'
 import { buildSlashItems, filterSlashItems } from '../extensions/slashItems'
@@ -20,7 +21,8 @@ import Collaboration from '@tiptap/extension-collaboration'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Toolbar } from './Toolbar'
 import { getNoteDoc } from '../store/notes'
-import { projectOf, renameNode, typesFor, useBlockTypes, useTree } from '../store/tree'
+import { createNode, projectOf, renameNode, typesFor, useBlockTypes, useTree } from '../store/tree'
+import { prepareTodoNote } from '../store/todos'
 import type { TreeNode } from '../store/tree'
 
 interface Props {
@@ -29,7 +31,7 @@ interface Props {
   onStats: (words: number | null) => void
 }
 
-function Body({ node, crumbs, onStats }: Props) {
+function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }) {
   const { doc } = getNoteDoc(node.id)
   const { nodes } = useTree()
   const projectId = projectOf(nodes, node.id)
@@ -48,11 +50,11 @@ function Body({ node, crumbs, onStats }: Props) {
   const editor = useEditor(
     {
       extensions: [
-        ...buildExtensions(),
+        ...buildExtensions(todoMode),
         Collaboration.configure({ document: doc, field: 'content' }),
         Placeholder.configure({ placeholder: 'Écris quelque chose… ou tape / pour insérer un bloc' }),
         ImagePaste,
-        MoveBlock,
+        ...(todoMode ? [] : [MoveBlock]),
         Search,
         SlashCommand.extend({ name: 'wikiLinkMenu' }).configure({
           char: '[[',
@@ -61,10 +63,34 @@ function Body({ node, crumbs, onStats }: Props) {
           getItems: (q) => {
             const norm = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
             const nq = norm(q.trim())
-            return nodesRef.current
-              .filter((n) => n.type === 'note' && n.id !== node.id && norm(n.name).includes(nq))
+            const matches = nodesRef.current.filter((n) => n.type === 'note' && n.id !== node.id && norm(n.name).includes(nq))
+            const name = q.trim()
+            const exact = nodesRef.current.some((n) => n.type === 'note' && norm(n.name) === nq)
+            // Aucune page de ce nom : on propose de la créer (dans le même projet) et de la lier.
+            const create: SlashItem[] =
+              name && !exact
+                ? [
+                    {
+                      id: '__create__',
+                      label: `Créer la page « ${name} »`,
+                      hint: 'Nouvelle page',
+                      group: 'Lier une note',
+                      run: ({ editor, range }) => {
+                        const id = createNode(projectOf(nodesRef.current, node.id), 'note', name)
+                        editor
+                          .chain()
+                          .focus()
+                          .deleteRange(range)
+                          .insertContent([{ type: 'noteLink', attrs: { id, label: name } }, { type: 'text', text: ' ' }])
+                          .run()
+                      },
+                    },
+                  ]
+                : []
+            return [
+              ...matches
               .slice(0, 12)
-              .map((n) => ({
+              .map((n): SlashItem => ({
                 id: n.id,
                 label: n.name,
                 hint: (() => {
@@ -84,15 +110,21 @@ function Body({ node, crumbs, onStats }: Props) {
                     .deleteRange(range)
                     .insertContent([{ type: 'noteLink', attrs: { id: n.id, label: n.name } }, { type: 'text', text: ' ' }])
                     .run(),
-              }))
+              })),
+              ...create,
+            ]
           },
         }),
-        SlashCommand.configure({
-          getItems: (q) => filterSlashItems(buildSlashItems(typesRef.current, () => setTypesOpen(true)), q),
-          onState: setSlash,
-        }),
+        ...(todoMode
+          ? []
+          : [
+              SlashCommand.configure({
+                getItems: (q) => filterSlashItems(buildSlashItems(typesRef.current, () => setTypesOpen(true)), q),
+                onState: setSlash,
+              }),
+            ]),
       ],
-      editorProps: { attributes: { class: 'doc', spellcheck: 'true' } },
+      editorProps: { attributes: { class: todoMode ? 'doc todo-doc' : 'doc', spellcheck: 'true' } },
     },
     [doc],
   )
@@ -132,7 +164,7 @@ function Body({ node, crumbs, onStats }: Props) {
 
   return (
     <>
-      {editor && (
+      {editor && !todoMode && (
         <Toolbar
           editor={editor}
           onToggleOutline={() => setOutlineOpen((v) => !v)}
@@ -159,6 +191,7 @@ function Body({ node, crumbs, onStats }: Props) {
             }}
           />
           <EditorContent editor={editor} />
+          {todoMode && <div className="todo-hint">↩ nouvelle tâche · <kbd>[[</kbd> lier une page ou en créer une</div>}
           <Backlinks noteId={node.id} nodes={nodes} />
           {editor && (
             <DragHandle editor={editor} nested>
@@ -219,17 +252,21 @@ function Body({ node, crumbs, onStats }: Props) {
   )
 }
 
-/** Charge le document local de la note avant de monter l'éditeur. */
+/** Charge le document local de la note avant de monter l'éditeur (et prépare les notes de todo). */
 export function NoteEditor(props: Props) {
   const { persistence } = getNoteDoc(props.node.id)
-  const [synced, setSynced] = useState(persistence.synced)
+  const [state, setState] = useState<{ ready: boolean; todo: boolean }>({ ready: false, todo: false })
+  const isTodo = props.node.kind === 'todo'
   useEffect(() => {
     let alive = true
-    void persistence.whenSynced.then(() => alive && setSynced(true))
+    void persistence.whenSynced.then(async () => {
+      const todo = isTodo ? await prepareTodoNote(props.node.id) : false
+      if (alive) setState({ ready: true, todo })
+    })
     return () => {
       alive = false
     }
-  }, [persistence])
-  if (!synced) return <div className="doc-loading" />
-  return <Body {...props} />
+  }, [persistence, isTodo, props.node.id])
+  if (!state.ready) return <div className="doc-loading" />
+  return <Body {...props} todoMode={state.todo} />
 }
