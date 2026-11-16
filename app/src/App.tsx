@@ -8,6 +8,7 @@ import { DataDialog } from './components/DataDialog'
 import { StatusBar } from './components/StatusBar'
 import { SettingsDialog } from './components/SettingsDialog'
 import { useMirror } from './store/mirror'
+import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
 import { Mascot } from './components/Mascot'
 import { countDescendants, createNode, removeNode, renameNode, useTree } from './store/tree'
 import type { NodeType, NoteKind, TreeNode } from './store/tree'
@@ -179,6 +180,12 @@ export default function App() {
     setSelectedId((s) => (s && ids.includes(s) ? null : s))
     setToDelete(null)
   }
+
+  useEffect(() => {
+    const onOpen = (e: Event) => openNote((e as CustomEvent<string>).detail)
+    window.addEventListener(OPEN_NOTE_EVENT, onOpen)
+    return () => window.removeEventListener(OPEN_NOTE_EVENT, onOpen)
+  }, [openNote])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

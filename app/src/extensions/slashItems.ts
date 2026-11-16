@@ -2,6 +2,8 @@ import type { SlashItem } from './SlashCommand'
 import type { BlockType } from '../store/tree'
 import { pickImages } from './ImageBlock'
 import { colorCss } from '../store/colors'
+import { mathBridge } from './mathBridge'
+import { placeCursorInFirst } from './placeCursor'
 
 // Sans accents, sans espaces : « 3col » trouve « 3 colonnes ».
 const norm = (s: string) =>
@@ -47,6 +49,24 @@ export function buildSlashItems(types: BlockType[], manageTypes: () => void): Sl
       run: ({ editor, range }) => editor.chain().focus().deleteRange(range).insertColumns(3).run(),
     },
     {
+      id: 'details',
+      label: 'Bloc repliable',
+      hint: 'Titre + contenu masquable',
+      group: 'Mise en page',
+      run: ({ editor, range }) =>
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .insertContent({
+            type: 'details',
+            attrs: { open: true },
+            content: [{ type: 'detailsSummary' }, { type: 'detailsContent', content: [{ type: 'paragraph' }] }],
+          })
+          .command(({ tr }) => placeCursorInFirst(tr, range.from, 'details', 2))
+          .run(),
+    },
+    {
       id: 'solution',
       label: 'Solution repliable',
       hint: 'À mettre dans un exercice',
@@ -58,6 +78,29 @@ export function buildSlashItems(types: BlockType[], manageTypes: () => void): Sl
           .deleteRange(range)
           .insertContent({ type: 'solution', attrs: { open: true }, content: [{ type: 'paragraph' }] })
           .run(),
+    },
+  ]
+
+  const maths: SlashItem[] = [
+    {
+      id: 'math-block',
+      label: 'Formule (bloc)',
+      hint: 'LaTeX, ou tape $$…$$',
+      group: 'Maths',
+      run: ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).run()
+        mathBridge.create('block')
+      },
+    },
+    {
+      id: 'math-inline',
+      label: 'Formule (dans le texte)',
+      hint: 'Ou tape $…$',
+      group: 'Maths',
+      run: ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).run()
+        mathBridge.create('inline')
+      },
     },
   ]
 
@@ -147,7 +190,7 @@ export function buildSlashItems(types: BlockType[], manageTypes: () => void): Sl
     },
   }
 
-  return [...blocks, manage, ...layout, ...media, ...text]
+  return [...blocks, manage, ...layout, ...maths, ...media, ...text]
 }
 
 export function filterSlashItems(items: SlashItem[], query: string): SlashItem[] {

@@ -1,6 +1,7 @@
 import { Extension } from '@tiptap/core'
 import type { Editor, Range } from '@tiptap/core'
 import { Suggestion } from '@tiptap/suggestion'
+import { PluginKey } from '@tiptap/pm/state'
 
 export interface SlashItem {
   id: string
@@ -22,6 +23,9 @@ export interface SlashState {
 export interface SlashOptions {
   getItems: (query: string) => SlashItem[]
   onState: (state: SlashState | null) => void
+  /** Caractère(s) qui déclenchent le menu (« / » par défaut, « [[ » pour les liens). */
+  char: string
+  allowSpaces: boolean
 }
 
 interface LiveProps {
@@ -35,7 +39,7 @@ export const SlashCommand = Extension.create<SlashOptions>({
   name: 'slashCommand',
 
   addOptions() {
-    return { getItems: () => [], onState: () => {} }
+    return { getItems: () => [], onState: () => {}, char: '/', allowSpaces: false }
   },
 
   addProseMirrorPlugins() {
@@ -43,8 +47,9 @@ export const SlashCommand = Extension.create<SlashOptions>({
     return [
       Suggestion<SlashItem, SlashItem>({
         editor: this.editor,
-        char: '/',
-        allowSpaces: false,
+        pluginKey: new PluginKey(this.name),
+        char: opts.char,
+        allowSpaces: opts.allowSpaces,
         items: ({ query }) => opts.getItems(query),
         command: ({ editor, range, props }) => props.run({ editor, range }),
         render: () => {

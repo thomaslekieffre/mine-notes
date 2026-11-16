@@ -510,3 +510,75 @@ kbd { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mu
 .set-keys { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 12.5px; color: var(--text2); }
 .set-about { display: flex; align-items: center; gap: 14px; }
 .dialog.settings { max-width: 560px; max-height: 86vh; overflow-y: auto; }
+
+/* ───── Formules, code coloré, liens, repliable ───── */
+.math-input {
+  width: 100%; box-sizing: border-box; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; resize: vertical; margin: 4px 0 10px;
+}
+.math-preview { min-height: 52px; padding: 10px; border: 1px dashed var(--border); border-radius: 6px; margin-bottom: 14px; overflow-x: auto; text-align: center; }
+.doc .tiptap-mathematics-render { cursor: pointer; border-radius: 4px; padding: 0 2px; }
+.doc .tiptap-mathematics-render:hover { background: var(--active); }
+.doc [data-type='block-math'] .tiptap-mathematics-render, .doc .block-math-inner { display: block; text-align: center; padding: 6px 0; overflow-x: auto; }
+.doc .tiptap-mathematics-render.ProseMirror-selectednode { outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent); }
+
+.codeblock { position: relative; margin: 0.8em 0; }
+.codeblock pre { margin: 0; }
+.code-lang {
+  position: absolute; top: 6px; right: 8px; z-index: 1; height: 22px; font-size: 11px; border-radius: 5px; border: 1px solid var(--border);
+  background: var(--bar); color: var(--muted); opacity: 0; transition: opacity 0.15s;
+}
+.codeblock:hover .code-lang, .code-lang:focus { opacity: 1; }
+.hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-doctag { color: var(--c-purple); }
+.hljs-string, .hljs-regexp, .hljs-addition { color: var(--c-green); }
+.hljs-number, .hljs-symbol, .hljs-bullet, .hljs-variable, .hljs-template-variable { color: var(--c-orange); }
+.hljs-title, .hljs-section, .hljs-function .hljs-title, .hljs-attr, .hljs-attribute { color: var(--c-blue); }
+.hljs-built_in, .hljs-type, .hljs-class .hljs-title, .hljs-name, .hljs-tag { color: var(--c-cyan); }
+.hljs-comment, .hljs-quote, .hljs-meta { color: var(--muted); font-style: italic; }
+.hljs-deletion { color: var(--c-red); }
+.hljs-emphasis { font-style: italic; } .hljs-strong { font-weight: 700; }
+
+.note-link {
+  display: inline-flex; align-items: center; gap: 4px; padding: 0 7px; border-radius: 5px; cursor: pointer; font-size: 0.95em;
+  background: color-mix(in srgb, var(--c-blue) 16%, transparent); color: var(--c-blue); border: 1px solid color-mix(in srgb, var(--c-blue) 30%, transparent);
+}
+.note-link:hover { background: color-mix(in srgb, var(--c-blue) 26%, transparent); }
+.note-link.broken { color: var(--muted); text-decoration: line-through; cursor: default; background: none; border-color: var(--border); }
+.note-link.ProseMirror-selectednode { outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent); }
+
+.backlinks { margin-top: 56px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+.backlinks-title { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.backlink { display: flex; align-items: center; gap: 7px; padding: 4px 8px; border-radius: 6px; font-size: 13px; color: var(--text2); background: none; border: 0; }
+.backlink:hover { background: var(--active); color: var(--text); }
+
+.doc [data-type='details'] { margin: 0.6em 0; border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; display: flex; gap: 6px; align-items: flex-start; }
+.doc [data-type='details'] > button { flex-shrink: 0; width: 22px; height: 28px; background: none; border: 0; color: var(--muted); cursor: pointer; position: relative; }
+.doc [data-type='details'] > button::before { content: '▸'; display: block; font-size: 14px; transition: transform 0.15s; }
+.doc [data-type='details'].is-open > button::before { transform: rotate(90deg); }
+.doc [data-type='details'] > div { flex: 1; min-width: 0; }
+.doc [data-type='detailsSummary'] { font-weight: 600; padding: 3px 0; }
+.doc [data-type='detailsContent'] > * { margin-left: 0; }
+.doc [data-type='detailsContent'] { padding-bottom: 4px; }
+
+/* ───── Recherche, plan ───── */
+.searchbar {
+  position: fixed; top: 92px; right: 24px; z-index: 40; padding: 8px; border-radius: 10px; background: var(--bar);
+  border: 1px solid var(--border); box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 6px; width: 340px; max-width: calc(100vw - 32px);
+}
+.sb-row { display: flex; align-items: center; gap: 4px; }
+.sb-row input { flex: 1; min-width: 0; height: 28px; padding: 0 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px; }
+.sb-count { font-size: 11px; color: var(--muted); min-width: 34px; text-align: center; }
+.icon-btn.on { background: var(--active); }
+.search-hit { background: color-mix(in srgb, var(--accent) 35%, transparent); border-radius: 2px; }
+.search-hit.current { background: color-mix(in srgb, var(--accent) 75%, transparent); outline: 1px solid var(--accent); }
+.outline {
+  position: fixed; top: 100px; right: 16px; z-index: 30; width: 230px; max-height: calc(100vh - 160px); overflow-y: auto; padding: 8px;
+  border-radius: 10px; background: var(--bar); border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.outline-head { display: flex; align-items: center; justify-content: space-between; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 2px 4px 6px; }
+.outline-item { display: block; width: 100%; text-align: left; padding: 4px 8px; border-radius: 5px; font-size: 12.5px; color: var(--text2); background: none; border: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.outline-item:hover { background: var(--active); color: var(--text); }
+.outline-empty { padding: 6px 8px; font-size: 12px; color: var(--muted); }
+
+.doc .katex { font-size: 1.15em; }
+.doc .katex-display { margin: 0.3em 0; }

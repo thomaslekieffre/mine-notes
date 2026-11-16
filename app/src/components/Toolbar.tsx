@@ -55,7 +55,7 @@ function Btn({
   )
 }
 
-export function Toolbar({ editor }: { editor: Editor }) {
+export function Toolbar({ editor, onToggleOutline, onToggleSearch }: { editor: Editor; onToggleOutline: () => void; onToggleSearch: () => void }) {
   const s = useEditorState({
     editor,
     selector: ({ editor: e }) => {
@@ -195,6 +195,12 @@ export function Toolbar({ editor }: { editor: Editor }) {
       )}
 
       <span className="grow" />
+      <button type="button" className="tb-btn" title="Rechercher dans la note (⌘F)" aria-label="Rechercher dans la note" onMouseDown={keepFocus} onClick={onToggleSearch}>
+        <Icon name="search" size={15} />
+      </button>
+      <button type="button" className="tb-btn" title="Plan de la note" aria-label="Plan de la note" onMouseDown={keepFocus} onClick={onToggleOutline}>
+        <Icon name="menu" size={15} />
+      </button>
       <button
         type="button"
         className="tb-add"

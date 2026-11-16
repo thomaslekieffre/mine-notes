@@ -24,7 +24,7 @@ export function StatusBar({
       <span className="grow" />
       {words !== null && (
         <span>
-          {words} mot{words > 1 ? 's' : ''}
+          {words} mot{words > 1 ? "s" : ""}{words > 0 && ` · ${Math.max(1, Math.round(words / 200))} min`}
         </span>
       )}
       <button type="button" className="status-btn" onClick={onCycleTheme} title="Changer de thème">

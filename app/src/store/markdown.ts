@@ -16,6 +16,7 @@ function inline(nodes: PMNode[] = []): string {
   return nodes
     .map((n) => {
       if (n.type === 'hardBreak') return '  \n'
+      if (n.type === 'inlineMath' || n.type === 'noteLink') return block(n)
       let t = n.text ?? ''
       for (const m of n.marks ?? []) {
         if (m.type === 'bold') t = `**${t}**`
@@ -83,6 +84,18 @@ function block(n: PMNode): string {
       const pad = (r: string[]) => `| ${Array.from({ length: width }, (_, i) => r[i] ?? '').join(' | ')} |`
       return [pad(rows[0]), `| ${Array(width).fill('---').join(' | ')} |`, ...rows.slice(1).map(pad)].join('\n')
     }
+    case 'inlineMath':
+      return `$${String(n.attrs?.latex ?? '')}$`
+    case 'blockMath':
+      return `$$\n${String(n.attrs?.latex ?? '')}\n$$`
+    case 'noteLink':
+      return `[[${String(n.attrs?.label ?? 'note')}]]`
+    case 'details':
+      return `<details>\n${blocks(n.content)}\n</details>`
+    case 'detailsSummary':
+      return `<summary>${inline(n.content)}</summary>`
+    case 'detailsContent':
+      return blocks(n.content)
     case 'image':
       return '*[image]*'
     case 'diagram':

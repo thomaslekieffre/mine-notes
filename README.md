@@ -6,6 +6,9 @@ Pensée pour les idées, les cours, les todo et le journal.
 - **Éditeur riche** (TipTap / ProseMirror) : titres, listes, tâches, tableaux, code, surlignage, polices, couleurs, tailles et un style « crayon gris ».
 - **Blocs personnalisés** : définition, exemple, exercice… et tes propres types, avec 21 couleurs ou une couleur libre. Un type peut être global ou réservé à un projet.
 - **Mise en page** : 2 ou 3 colonnes, solutions repliables, déplacement des blocs (glisser ou `Alt+↑/↓`).
+- **Maths et code** : formules LaTeX (KaTeX, `$…$` et `$$…$$`), blocs de code colorés avec choix du langage, blocs repliables.
+- **Liens entre notes** : tape `[[` pour lier une note ; chaque note affiche les notes qui la mentionnent.
+- **Confort** : recherche et remplacement dans la note (`⌘F`), plan des titres, collage de Markdown, typographie française, emoji `:smile:`, temps de lecture.
 - **Images** (collage, zoom, redimensionnement) et **schémas** (Excalidraw : formes, flèches, main levée).
 - **Arborescence façon IDE** : dossiers, projets avec leur propre todo / idées / journal, onglets, palette `⌘P` avec recherche dans le texte.
 - **Vue « Toutes les todo »** qui agrège les tâches de toutes les notes.
