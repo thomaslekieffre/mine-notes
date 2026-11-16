@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Icon, nodeIcon } from './Icon'
+import { Icon, NodeIcon } from './Icon'
 import { searchContent } from '../store/search'
 import type { TreeNode } from '../store/tree'
 
@@ -89,7 +89,6 @@ export function Palette({ nodes, onOpen, onNewNote, onClose }: Props) {
   }
 
   const renderRow = (r: Row, i: number) => {
-    const { icon, color } = nodeIcon(r.n)
     return (
       <div
         key={r.n.id}
@@ -99,7 +98,7 @@ export function Palette({ nodes, onOpen, onNewNote, onClose }: Props) {
         onMouseEnter={() => setIdx(i)}
         onClick={() => choose(i)}
       >
-        <Icon name={icon} size={15} style={{ color }} />
+        <NodeIcon node={r.n} size={15} />
         <span style={{ minWidth: 0 }}>
           <span>{r.n.name}</span>
           {r.snippet && <span className="palette-snippet">{r.snippet}</span>}

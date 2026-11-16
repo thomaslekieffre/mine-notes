@@ -1,4 +1,4 @@
-import { Icon, nodeIcon } from './Icon'
+import { Icon, NodeIcon } from './Icon'
 import type { TreeNode } from '../store/tree'
 
 interface Props {
@@ -16,12 +16,11 @@ export function Tabs({ tabs, activeId, onActivate, onClose, onMenu }: Props) {
         <Icon name="menu" size={20} />
       </button>
       {tabs.map((t) => {
-        const { icon, color } = nodeIcon(t)
         const active = t.id === activeId
         return (
           <div key={t.id} role="tab" aria-selected={active} className={active ? 'tab active' : 'tab'}>
             <button type="button" className="tab-main" onClick={() => onActivate(t.id)}>
-              <Icon name={icon} size={14} style={{ color, flexShrink: 0 }} />
+              <NodeIcon node={t} size={14} />
               <span className="tab-name">{t.name}</span>
             </button>
             <button type="button" className="tab-close" aria-label={`Fermer ${t.name}`} onClick={() => onClose(t.id)}>

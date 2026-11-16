@@ -16,6 +16,10 @@ export interface TreeNode {
   order: number
   /** Présent quand l'élément a été mis à la corbeille (date en ms). Ses enfants le suivent. */
   trashedAt?: number
+  /** Icône choisie : nom d'une icône de la liste, ou un emoji. */
+  icon?: string
+  /** Couleur de l'icône (nom de la palette des blocs). */
+  iconColor?: string
   /** Note du jour : date locale « AAAA-MM-JJ ». */
   day?: string
   /** Dossier qui range les notes du jour. */
@@ -411,3 +415,16 @@ export function ensureDailyNote(d = new Date()): { noteId: string; folderId: str
 /** Indicateurs simples stockés avec l'arborescence (ex. « la démo a déjà été créée »). */
 export const getFlag = (key: string): boolean => yMeta.get(key) === true
 export const setFlag = (key: string) => yMeta.set(key, true)
+
+
+/** Change l'icône d'un élément (null = revenir à l'icône par défaut). */
+export function setNodeIcon(id: string, icon: string | null, color: string | null) {
+  const m = yNodes.get(id)
+  if (!m) return
+  doc.transact(() => {
+    if (icon) m.set('icon', icon)
+    else m.delete('icon')
+    if (icon && color) m.set('iconColor', color)
+    else m.delete('iconColor')
+  })
+}

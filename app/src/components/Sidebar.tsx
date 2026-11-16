@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DragEvent, MouseEvent } from 'react'
-import { Icon, nodeIcon } from './Icon'
+import { Icon, NodeIcon } from './Icon'
 import type { IconName } from './Icon'
 import { Mascot } from './Mascot'
 import { pretty, useShortcuts } from '../store/shortcuts'
@@ -26,6 +26,7 @@ interface Props {
   onOpenTodos: () => void
   onOpenToday: () => void
   onOpenSettings: () => void
+  onChangeIcon: (n: TreeNode) => void
   trashCount: number
   onOpenTrash: () => void
   todosActive: boolean
@@ -171,7 +172,6 @@ export function Sidebar(props: Props) {
   const renderRows = (parentId: string | null, depth: number): React.ReactNode[] =>
     (byParent.get(parentId) ?? []).flatMap((n) => {
       const open = isContainer(n) && expanded.includes(n.id)
-      const { icon, color } = nodeIcon(n)
       const selected = n.id === selectedId || n.id === activeId
       const cls = [
         'row',
@@ -206,7 +206,7 @@ export function Sidebar(props: Props) {
           ) : (
             <span className="chev-space" />
           )}
-          <Icon name={icon} style={{ color, flexShrink: 0 }} />
+          <NodeIcon node={n} size={16} open={open} />
           {renamingId === n.id ? (
             <RenameInput
               initial={n.name}
@@ -232,6 +232,7 @@ export function Sidebar(props: Props) {
     if (n) {
       items.push(
         { label: 'Renommer', icon: 'rename', run: () => props.onStartRename(n.id) },
+        { label: 'Changer l\'icône…', icon: 'star', run: () => props.onChangeIcon(n) },
         { label: 'Mettre à la corbeille', icon: 'trash', run: () => props.onDelete(n), danger: true },
       )
     }

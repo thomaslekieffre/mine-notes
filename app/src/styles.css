@@ -670,3 +670,11 @@ body.resizing * { cursor: col-resize !important; }
 .brand { min-width: 0; flex-shrink: 1 !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sidebar-narrow .brand { display: none; }
 .sidebar-narrow .side-head { gap: 2px; padding-left: 10px; padding-right: 6px; }
+
+/* ───── Icônes personnalisées ───── */
+.node-emoji { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+.icon-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 8px 0 12px; }
+.icon-cell { height: 38px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid transparent; background: none; color: var(--text2); cursor: pointer; font-size: 19px; }
+.icon-cell:hover { background: var(--active); color: var(--text); }
+.icon-cell.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--text); }
+.icon-colors { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-bottom: 10px; }

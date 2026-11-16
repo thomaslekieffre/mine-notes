@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Icon, nodeIcon } from './Icon'
+import { Icon, NodeIcon } from './Icon'
 import { findBacklinks } from '../store/links'
 import { OPEN_NOTE_EVENT } from '../extensions/NoteLink'
 import type { TreeNode } from '../store/tree'
@@ -21,10 +21,9 @@ export function Backlinks({ noteId, nodes }: { noteId: string; nodes: TreeNode[]
         <Icon name="file" size={13} /> Mentionnée dans {list.length} note{list.length > 1 ? 's' : ''}
       </div>
       {list.map((n) => {
-        const { icon, color } = nodeIcon(n)
         return (
           <button key={n.id} type="button" className="backlink" onClick={() => window.dispatchEvent(new CustomEvent(OPEN_NOTE_EVENT, { detail: n.id }))}>
-            <Icon name={icon} size={13} style={{ color }} />
+            <NodeIcon node={n} size={13} />
             {n.name}
           </button>
         )

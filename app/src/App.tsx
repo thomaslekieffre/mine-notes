@@ -12,6 +12,7 @@ import { restoreNode } from './store/tree'
 import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
 import { QuickCapture } from './components/QuickCapture'
+import { IconPicker } from './components/IconPicker'
 import { toggleReading } from './store/reading'
 import { SIDEBAR_NARROW, setSidebarCollapsed, toggleSidebar, useLayout } from './store/layout'
 import { createDemo } from './store/demo'
@@ -68,6 +69,7 @@ export default function App() {
   const [dataOpen, setDataOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [trashOpen, setTrashOpen] = useState(false)
+  const [iconTarget, setIconTarget] = useState<TreeNode | null>(null)
   const [undo, setUndo] = useState<{ id: string; name: string } | null>(null)
   const [quick, setQuick] = useState<{ mode: QuickMode; fromOutside: boolean } | null>(null)
   const [flash, setFlash] = useState<string | null>(null)
@@ -322,6 +324,7 @@ export default function App() {
         trashCount={trash.length}
         onOpenTrash={() => setTrashOpen(true)}
         onOpenSettings={() => setSettingsOpen(true)}
+        onChangeIcon={setIconTarget}
         nodes={nodes}
         selectedId={selectedId}
         activeId={ui.activeId}
@@ -426,6 +429,8 @@ export default function App() {
           <span>{flash}</span>
         </div>
       )}
+
+      {iconTarget && <IconPicker node={byId.get(iconTarget.id) ?? iconTarget} onClose={() => setIconTarget(null)} />}
 
       {trashOpen && (
         <TrashDialog

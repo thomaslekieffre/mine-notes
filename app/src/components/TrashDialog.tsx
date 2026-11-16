@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Icon, nodeIcon } from './Icon'
+import { Icon, NodeIcon } from './Icon'
 import { emptyTrash, originPath, purgeNode, restoreNode, trashedContentCount, useTree } from '../store/tree'
 
 const ago = (t: number) => {
@@ -34,12 +34,11 @@ export function TrashDialog({ onClose, onRestore }: { onClose: () => void; onRes
         <div className="trash-list">
           {trash.length === 0 && <div className="tree-empty">La corbeille est vide.</div>}
           {trash.map((n) => {
-            const { icon, color } = nodeIcon(n)
             const inside = n.type === 'note' ? 0 : trashedContentCount(n.id)
             const from = originPath(n.id)
             return (
               <div key={n.id} className="trash-row">
-                <Icon name={icon} size={15} style={{ color, flexShrink: 0 }} />
+                <NodeIcon node={n} size={15} />
                 <span className="trash-main">
                   <span className="trash-name">{n.name}</span>
                   <span className="trash-meta">

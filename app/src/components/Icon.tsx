@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import type { TreeNode } from '../store/tree'
+import { colorCss } from '../store/colors'
 
 const PATHS = {
   folder: 'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
@@ -32,6 +33,38 @@ const PATHS = {
   settings: 'M12 9a3 3 0 1 0 0 6a3 3 0 0 0 0-6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z',
   eye: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6a3 3 0 0 0 0-6z',
   pen: 'M4 20l1-4L16 5l3 3L8 19zM14 7l3 3',
+  folderOpen: 'M3 18V7a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v2M3 18l3-8h16l-3 8z',
+  star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',
+  heart: 'M12 20s-7-4.6-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.4-7 10-7 10z',
+  bookmark: 'M6 3h12v18l-6-4-6 4z',
+  flag: 'M5 21V4M5 4h11l-2 4 2 4H5',
+  bolt: 'M13 3L5 13h6l-1 8 8-10h-6z',
+  flask: 'M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3',
+  book: 'M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h11',
+  graduation: 'M2 9l10-5 10 5-10 5zM6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5',
+  terminal: 'M4 5h16v14H4zM7 10l3 2-3 2M12 15h5',
+  database: 'M4 6c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3zM4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6',
+  globe: 'M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18zM3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18',
+  music: 'M9 18V6l11-2v12M9 18a3 3 0 1 1-6 0a3 3 0 0 1 6 0zM20 16a3 3 0 1 1-6 0a3 3 0 0 1 6 0z',
+  camera: 'M4 7h3l2-3h6l2 3h3v13H4zM12 10a3.5 3.5 0 1 0 0 7a3.5 3.5 0 0 0 0-7z',
+  clip: 'M20 11l-8.5 8.5a5 5 0 0 1-7-7L13 4a3.3 3.3 0 0 1 5 5l-8.5 8.5a1.7 1.7 0 0 1-2.5-2.5L14 8',
+  lock: 'M5 11h14v10H5zM8 11V8a4 4 0 0 1 8 0v3',
+  key: 'M15 8a4 4 0 1 1-4 4M11 12L4 19M4 19h3M7 16v3',
+  home: 'M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6',
+  user: 'M12 4a4 4 0 1 0 0 8a4 4 0 0 0 0-8zM4 21c0-4 4-6 8-6s8 2 8 6',
+  cart: 'M3 4h3l2 11h11l2-8H7M9 20h.01M18 20h.01',
+  clock: 'M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18zM12 7v5l3 2',
+  mail: 'M3 6h18v13H3zM3 7l9 7 9-7',
+  chat: 'M4 5h16v11H9l-5 4z',
+  target: 'M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18zM12 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8zM12 12h.01',
+  rocket: 'M5 19c0-3 2-5 4-5M14 5c3 0 5 2 5 5-2 4-5 7-9 9l-3-3c2-4 5-7 7-11zM15 10h.01',
+  leaf: 'M5 19C5 10 10 5 20 4c0 10-5 15-14 15zM5 19l8-8',
+  cloud: 'M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1 0 9z',
+  palette: 'M12 3a9 9 0 1 0 0 18c1.5 0 2-1 1.5-2-.5-1 0-2 1.5-2h2a3 3 0 0 0 3-3A9 9 0 0 0 12 3zM7.5 11h.01M10 7h.01M15 7h.01',
+  sigma: 'M18 5H6l6 7-6 7h12',
+  chart: 'M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6',
+  wrench: 'M15 6a4 4 0 0 0-5 5L4 17l3 3 6-6a4 4 0 0 0 5-5l-3 3-2-1-1-2z',
+  trophy: 'M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8M10 18h4',
   shapes: 'M3 4h8v8H3zM17 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8zM6 20l4-6 4 6z',
 } as const
 
@@ -64,9 +97,35 @@ export function Icon({
   )
 }
 
-/** Icône et couleur d'un nœud de l'arborescence selon son type. */
-export function nodeIcon(n: Pick<TreeNode, 'type' | 'kind'>): { icon: IconName; color: string } {
-  if (n.type === 'folder') return { icon: 'folder', color: 'var(--text2)' }
+/** Icônes proposées dans le sélecteur d'icône d'un élément. */
+export const ICON_CHOICES: IconName[] = [
+  'file', 'folder', 'project', 'check', 'bulb', 'calendar', 'book', 'graduation', 'flask', 'sigma', 'code', 'terminal',
+  'database', 'chart', 'globe', 'image', 'camera', 'music', 'palette', 'shapes', 'star', 'heart', 'bookmark', 'flag',
+  'bolt', 'target', 'rocket', 'trophy', 'leaf', 'cloud', 'sun', 'moon', 'home', 'user', 'mail', 'chat', 'clock', 'cart',
+  'lock', 'key', 'clip', 'wrench',
+]
+
+/** Emoji proposés dans le sélecteur d'icône. */
+export const EMOJI_CHOICES = [
+  '📚', '📖', '📝', '✏️', '📌', '📎', '🗂️', '📁', '🧠', '💡', '🎯', '🚀', '⭐', '❤️', '🔥', '✅', '❗', '❓', '🧪', '🔬',
+  '🧮', '📐', '📊', '📈', '💻', '🖥️', '📱', '🎮', '🎵', '🎬', '📷', '🎨', '🌍', '🌱', '☀️', '🌙', '🏠', '💼', '💰', '🛒',
+  '✈️', '🚗', '🍎', '☕', '🎓', '🏆', '🔑', '🔒', '⚙️', '🧩', '🗓️', '⏰', '📧', '💬', '🐱', '🐶',
+]
+
+const asIconName = (v?: string): IconName | undefined => (v && v in PATHS ? (v as IconName) : undefined)
+
+/** Icône et couleur d'un nœud : celles qu'il a choisies, sinon celles de son type. */
+export function nodeIcon(
+  n: Pick<TreeNode, 'type' | 'kind'> & { icon?: string; iconColor?: string },
+  open = false,
+): { icon: IconName; color: string; emoji?: string } {
+  const color = n.iconColor ? colorCss(n.iconColor) : undefined
+  if (n.icon) {
+    const named = asIconName(n.icon)
+    if (named) return { icon: named, color: color ?? 'var(--text2)' }
+    return { icon: 'file', color: 'var(--text2)', emoji: n.icon }
+  }
+  if (n.type === 'folder') return { icon: open ? 'folderOpen' : 'folder', color: 'var(--text2)' }
   if (n.type === 'project') return { icon: 'project', color: 'var(--def)' }
   switch (n.kind) {
     case 'todo':
@@ -78,4 +137,25 @@ export function nodeIcon(n: Pick<TreeNode, 'type' | 'kind'>): { icon: IconName; 
     default:
       return { icon: 'file', color: 'var(--text2)' }
   }
+}
+
+/** L'icône d'un élément de l'arborescence (icône ou emoji, selon son choix). */
+export function NodeIcon({
+  node,
+  size = 16,
+  open = false,
+}: {
+  node: Pick<TreeNode, 'type' | 'kind'> & { icon?: string; iconColor?: string }
+  size?: number
+  open?: boolean
+}) {
+  const { icon, color, emoji } = nodeIcon(node, open)
+  if (emoji) {
+    return (
+      <span className="node-emoji" style={{ fontSize: size - 1, width: size, height: size, flexShrink: 0 }} aria-hidden="true">
+        {emoji}
+      </span>
+    )
+  }
+  return <Icon name={icon} size={size} style={{ color, flexShrink: 0 }} />
 }
