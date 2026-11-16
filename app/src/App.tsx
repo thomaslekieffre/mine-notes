@@ -13,7 +13,7 @@ import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
 import { QuickCapture } from './components/QuickCapture'
 import type { QuickMode } from './components/QuickCapture'
-import { matches, pretty, useShortcuts } from './store/shortcuts'
+import { matches, pretty, toGlobalAccel, useShortcuts } from './store/shortcuts'
 import { isTauri } from './store/platform'
 import { Mascot } from './components/Mascot'
 import { countDescendants, createNode, ensureDailyNote, renameNode, trashNode, useTree } from './store/tree'
@@ -269,7 +269,7 @@ export default function App() {
       for (const mode of ['note', 'todo'] as const) {
         if (cancelled) return
         try {
-          await gs.register(keys[mode === 'note' ? 'quickNote' : 'quickTodo'], (ev) => {
+          await gs.register(toGlobalAccel(keys[mode === 'note' ? 'quickNote' : 'quickTodo']), (ev) => {
             if (ev.state === 'Pressed') void summon(mode)
           })
         } catch (e) {
