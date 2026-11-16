@@ -4,6 +4,7 @@ import { Icon, nodeIcon } from './Icon'
 import type { IconName } from './Icon'
 import { Mascot } from './Mascot'
 import { pretty, useShortcuts } from '../store/shortcuts'
+import { SIDEBAR_MIN, resetSidebarWidth, setSidebarCollapsed, setSidebarWidth } from '../store/layout'
 import { moveNode, moveToRoot } from '../store/tree'
 import type { DropPosition, NodeType, NoteKind, TreeNode } from '../store/tree'
 
@@ -37,6 +38,39 @@ interface MenuState {
 }
 
 const isContainer = (n: TreeNode) => n.type !== 'note'
+
+/** Bord de la barre latérale : on le glisse pour changer la largeur, double-clic pour revenir à la largeur d'origine. */
+function Resizer() {
+  const start = (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    document.body.classList.add('resizing')
+    const box = e.currentTarget.parentElement?.getBoundingClientRect()
+    const left = box?.left ?? 0
+    const initial = box?.width ?? SIDEBAR_MIN
+    // Écoute sur la fenêtre : la barre peut se replier (et disparaître) pendant le glissé.
+    const move = (ev: PointerEvent) => {
+      const w = ev.clientX - left
+      // Tiré presque tout à gauche : la barre se replie.
+      if (w < SIDEBAR_MIN - 70) {
+        setSidebarWidth(initial) // à la réouverture, on retrouve la largeur d'avant
+        setSidebarCollapsed(true)
+      } else {
+        setSidebarCollapsed(false)
+        setSidebarWidth(w)
+      }
+    }
+    const end = () => {
+      document.body.classList.remove('resizing')
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', end)
+      window.removeEventListener('pointercancel', end)
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', end)
+    window.addEventListener('pointercancel', end)
+  }
+  return <div className="sidebar-resizer" role="separator" aria-orientation="vertical" aria-label="Redimensionner la barre latérale" title="Glisser pour redimensionner · double-clic pour réinitialiser" onPointerDown={start} onDoubleClick={resetSidebarWidth} />
+}
 
 function RenameInput({
   initial,
@@ -275,6 +309,8 @@ export function Sidebar(props: Props) {
         <span className="row-name">Corbeille</span>
         {props.trashCount > 0 && <span className="trash-count">{props.trashCount}</span>}
       </button>
+
+      <Resizer />
 
       {menu && (
         <div

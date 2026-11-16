@@ -13,6 +13,7 @@ import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
 import { QuickCapture } from './components/QuickCapture'
 import { toggleReading } from './store/reading'
+import { setSidebarCollapsed, toggleSidebar, useLayout } from './store/layout'
 import { createDemo } from './store/demo'
 import type { QuickMode } from './components/QuickCapture'
 import { matches, pretty, toGlobalAccel, useShortcuts } from './store/shortcuts'
@@ -71,6 +72,7 @@ export default function App() {
   const [quick, setQuick] = useState<{ mode: QuickMode; fromOutside: boolean } | null>(null)
   const [flash, setFlash] = useState<string | null>(null)
   const keys = useShortcuts()
+  const layout = useLayout()
 
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
 
@@ -218,6 +220,9 @@ export default function App() {
       } else if (matches('closeTab', e) && ui.activeId) {
         e.preventDefault()
         closeTab(ui.activeId)
+      } else if (matches('toggleSidebar', e)) {
+        e.preventDefault()
+        toggleSidebar()
       } else if (matches('readMode', e)) {
         e.preventDefault()
         toggleReading()
@@ -309,7 +314,10 @@ export default function App() {
   const delCount = toDelete ? countDescendants(toDelete.id) : 0
 
   return (
-    <div className={sidebarOpen ? 'app sidebar-open' : 'app'}>
+    <div
+      className={`app${sidebarOpen ? ' sidebar-open' : ''}${layout.collapsed ? ' sidebar-collapsed' : ''}`}
+      style={{ '--sidebar-w': `${layout.width}px` } as React.CSSProperties}
+    >
       <Sidebar
         trashCount={trash.length}
         onOpenTrash={() => setTrashOpen(true)}
@@ -344,7 +352,10 @@ export default function App() {
           activeId={ui.activeId}
           onActivate={(id) => openNote(id)}
           onClose={closeTab}
-          onMenu={() => setSidebarOpen(true)}
+          onMenu={() => {
+            setSidebarOpen(true)
+            setSidebarCollapsed(false)
+          }}
         />
         {!ready ? (
           <div className="doc-loading" />

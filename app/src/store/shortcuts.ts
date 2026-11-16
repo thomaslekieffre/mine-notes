@@ -6,6 +6,7 @@ export type ShortcutId =
   | 'palette'
   | 'newNote'
   | 'closeTab'
+  | 'toggleSidebar'
   | 'settings'
   | 'rename'
   | 'findInNote'
@@ -29,6 +30,7 @@ export const SHORTCUTS: ShortcutDef[] = [
   { id: 'palette', label: 'Aller à une note', hint: 'Cherche aussi dans le texte', group: 'Navigation', default: 'Command+P' },
   { id: 'newNote', label: 'Nouvelle note', group: 'Navigation', default: 'Command+N' },
   { id: 'closeTab', label: "Fermer l'onglet", group: 'Navigation', default: 'Command+W' },
+  { id: 'toggleSidebar', label: 'Afficher / masquer la barre latérale', group: 'Navigation', default: 'Command+B' },
   { id: 'settings', label: 'Réglages', group: 'Navigation', default: 'Command+,' },
   { id: 'rename', label: 'Renommer', hint: "L'élément sélectionné dans l'arborescence", group: 'Navigation', default: 'F2' },
   { id: 'findInNote', label: 'Rechercher dans la note', group: 'Édition', default: 'Command+F' },

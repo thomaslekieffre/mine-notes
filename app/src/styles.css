@@ -61,7 +61,7 @@ kbd { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mu
 
 .app {
   display: grid; height: 100%;
-  grid-template-columns: 264px minmax(0, 1fr);
+  grid-template-columns: var(--sidebar-w, 264px) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) 24px;
 }
 
@@ -649,3 +649,18 @@ math-field:focus-within { border-color: var(--accent); outline: none; }
 .rb-colors { display: inline-flex; gap: 4px; }
 .pen-layer { position: fixed; z-index: 35; pointer-events: none; touch-action: none; }
 .pen-layer.on { pointer-events: auto; cursor: crosshair; }
+
+/* ───── Barre latérale : redimensionnable et repliable ───── */
+.sidebar-resizer { position: absolute; top: 0; bottom: 0; right: -4px; width: 8px; cursor: col-resize; z-index: 20; }
+.sidebar-resizer::after { content: ''; position: absolute; top: 0; bottom: 0; left: 3px; width: 2px; background: transparent; transition: background 0.15s; }
+.sidebar-resizer:hover::after, body.resizing .sidebar-resizer::after { background: var(--accent); }
+body.resizing { cursor: col-resize; user-select: none; }
+body.resizing * { cursor: col-resize !important; }
+@media (min-width: 761px) {
+  .app.sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
+  .app.sidebar-collapsed .sidebar { display: none; }
+  .app.sidebar-collapsed .main { grid-column: 1; }
+  /* Barre repliée : le bouton de la barre d'onglets la rouvre. */
+  .app.sidebar-collapsed .only-mobile { display: inline-flex; width: 36px; height: 36px; flex-shrink: 0; }
+  .tauri .app.sidebar-collapsed .tabs { padding-left: 78px; }
+}
