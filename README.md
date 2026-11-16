@@ -1,7 +1,51 @@
-# Mine ✏️
+<div align="center">
 
-Une app de notes **locale d'abord** : tes notes restent sur ton appareil, rien ne part dans un cloud.
-Pensée pour les idées, les cours, les todo et le journal.
+<img src="app/src-tauri/icons/128x128.png" width="96" alt="Mine, un petit crayon souriant" />
+
+# Mine
+
+**Tes notes, chez toi.** Une app de notes *locale d'abord* pour les idées, les cours, les todo et le journal : rien ne part dans un cloud.
+
+![Vite](https://img.shields.io/badge/Vite-React%2019-646cff?logo=vite&logoColor=white)
+![TipTap](https://img.shields.io/badge/%C3%89diteur-TipTap%20v3-0b0b0b)
+![Tauri](https://img.shields.io/badge/App%20Mac-Tauri%202-24c8db?logo=tauri&logoColor=white)
+![Local first](https://img.shields.io/badge/donn%C3%A9es-100%25%20locales-3ba55d)
+[![Licence MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
+
+![Démo de Mine : blocs colorés, colonnes, maths, code, schémas, palette, mode lecture avec stylo, thème clair](docs/media/demo.gif)
+
+<sub>Version vidéo plus nette : [docs/media/demo.mp4](docs/media/demo.mp4)</sub>
+
+</div>
+
+## Aperçu
+
+<table>
+<tr>
+<td width="50%"><img src="docs/media/hero-dark.png" alt="Éditeur, thème sombre" /><br/><sub><b>Éditeur riche</b> · thème sombre</sub></td>
+<td width="50%"><img src="docs/media/hero-light.png" alt="Éditeur, thème clair" /><br/><sub><b>Thème clair</b> · polices, couleurs, surlignage</sub></td>
+</tr>
+<tr>
+<td><img src="docs/media/blocs.png" alt="Blocs colorés et colonnes" /><br/><sub><b>Blocs colorés</b> (définition, exemple, exercice avec solution repliable…) et <b>colonnes</b></sub></td>
+<td><img src="docs/media/maths.png" alt="Formules mathématiques" /><br/><sub><b>Maths</b> saisies visuellement (MathLive + KaTeX)</sub></td>
+</tr>
+<tr>
+<td><img src="docs/media/code.png" alt="Blocs de code colorés" /><br/><sub><b>Code</b> coloré, langage au choix</sub></td>
+<td><img src="docs/media/image-schema.png" alt="Image et schéma Excalidraw" /><br/><sub><b>Images</b> et <b>schémas</b> Excalidraw</sub></td>
+</tr>
+<tr>
+<td><img src="docs/media/palette.png" alt="Palette de commandes" /><br/><sub><b>Palette <code>⌘P</code></b> avec recherche dans le texte</sub></td>
+<td><img src="docs/media/lecture.png" alt="Mode lecture avec stylo" /><br/><sub><b>Mode lecture <code>⌘E</code></b> : le stylo dessine par-dessus la note</sub></td>
+</tr>
+<tr>
+<td><img src="docs/media/liens.png" alt="Liens entre notes" /><br/><sub><b>Liens</b> <code>[[note]]</code> et notes qui te mentionnent</sub></td>
+<td><img src="docs/media/reglages.png" alt="Réglages" /><br/><sub><b>Réglages</b> : thème, police, largeur, raccourcis, sauvegarde</sub></td>
+</tr>
+</table>
+
+> Tout ce que tu vois ici vient de la **note de démonstration** livrée avec l'app (dossier « Démo Mine », créé au premier lancement ou depuis les réglages).
+
+## Fonctionnalités
 
 - **Éditeur riche** (TipTap / ProseMirror) : titres, listes, tâches, tableaux, code, surlignage, polices, couleurs, tailles et un style « crayon gris ».
 - **Blocs personnalisés** : définition, exemple, exercice… et tes propres types, avec 21 couleurs ou une couleur libre. Un type peut être global ou réservé à un projet.
@@ -29,13 +73,16 @@ Vite · React 19 · TypeScript · TipTap v3 · Yjs (+ y-indexeddb) · Excalidraw
 
 Les notes sont des documents Yjs stockés dans IndexedDB, ce qui prépare une synchronisation entre appareils (pas encore faite).
 
-## Lancer
+## Essayer
 
 ```bash
-cd app
+git clone https://github.com/thomaslekieffre/mine-notes.git
+cd mine-notes/app
 npm install
 npm run dev          # http://127.0.0.1:5173
 ```
+
+Au premier lancement, la note « Démo : toutes les fonctionnalités » te fait faire le tour.
 
 ### App de bureau (Tauri)
 
@@ -64,3 +111,7 @@ Voir [PLAN.md](PLAN.md) pour la vision, les jalons et ce qui reste (synchronisat
 ## Licence
 
 [MIT](LICENSE)
+
+## Regénérer les médias du README
+
+Les captures et la vidéo de `docs/media/` sont produites à partir de la note de démonstration (Playwright piloté sur `npm run dev`, puis `ffmpeg` pour le MP4 et le GIF). Si l'interface change, refais-les pour que le README reste fidèle.
