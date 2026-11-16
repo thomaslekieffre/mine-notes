@@ -111,7 +111,3 @@ Voir [PLAN.md](PLAN.md) pour la vision, les jalons et ce qui reste (synchronisat
 ## Licence
 
 [MIT](LICENSE)
-
-## Regénérer les médias du README
-
-Les captures et la vidéo de `docs/media/` sont produites à partir de la note de démonstration (Playwright piloté sur `npm run dev`, puis `ffmpeg` pour le MP4 et le GIF). Si l'interface change, refais-les pour que le README reste fidèle.
