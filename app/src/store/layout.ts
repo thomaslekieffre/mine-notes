@@ -51,3 +51,6 @@ export function useLayout(): Layout {
     () => state,
   )
 }
+
+export const isSidebarCollapsed = () => state.collapsed
+export const SIDEBAR_NARROW = 236 // en dessous, le nom « Mine » disparaît de l'en-tête pour que les icônes tiennent

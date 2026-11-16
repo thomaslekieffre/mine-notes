@@ -664,3 +664,9 @@ body.resizing * { cursor: col-resize !important; }
   .app.sidebar-collapsed .only-mobile { display: inline-flex; width: 36px; height: 36px; flex-shrink: 0; }
   .tauri .app.sidebar-collapsed .tabs { padding-left: 78px; }
 }
+
+/* Barre étroite : le nom disparaît et les icônes se resserrent pour ne pas dépasser. */
+.side-head > * { flex-shrink: 0; }
+.brand { min-width: 0; flex-shrink: 1 !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sidebar-narrow .brand { display: none; }
+.sidebar-narrow .side-head { gap: 2px; padding-left: 10px; padding-right: 6px; }

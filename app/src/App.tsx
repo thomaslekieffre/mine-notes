@@ -13,7 +13,7 @@ import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
 import { QuickCapture } from './components/QuickCapture'
 import { toggleReading } from './store/reading'
-import { setSidebarCollapsed, toggleSidebar, useLayout } from './store/layout'
+import { SIDEBAR_NARROW, setSidebarCollapsed, toggleSidebar, useLayout } from './store/layout'
 import { createDemo } from './store/demo'
 import type { QuickMode } from './components/QuickCapture'
 import { matches, pretty, toGlobalAccel, useShortcuts } from './store/shortcuts'
@@ -315,7 +315,7 @@ export default function App() {
 
   return (
     <div
-      className={`app${sidebarOpen ? ' sidebar-open' : ''}${layout.collapsed ? ' sidebar-collapsed' : ''}`}
+      className={`app${sidebarOpen ? ' sidebar-open' : ''}${layout.collapsed ? ' sidebar-collapsed' : ''}${layout.width < SIDEBAR_NARROW ? ' sidebar-narrow' : ''}`}
       style={{ '--sidebar-w': `${layout.width}px` } as React.CSSProperties}
     >
       <Sidebar
