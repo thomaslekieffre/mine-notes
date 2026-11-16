@@ -41,7 +41,14 @@ export function QuickCapture({ mode, nodes, onDone }: Props) {
 
   const targets = useMemo(() => {
     if (mode === 'todo') {
-      return nodes.filter((n) => n.type === 'note' && n.kind === 'todo').map((n) => ({ id: n.id, label: label(n) }))
+      // La Todo générale (hors projet) passe en premier : c'est le choix par défaut.
+      return nodes
+        .filter((n) => n.type === 'note' && n.kind === 'todo')
+        .map((n) => {
+          const inProject = n.parentId ? byId.get(n.parentId)?.type === 'project' : false
+          return { id: n.id, label: inProject ? `Projet : ${byId.get(n.parentId!)!.name}` : 'Sans projet (Todo générale)', general: !inProject }
+        })
+        .sort((a, b) => Number(b.general) - Number(a.general))
     }
     return [
       { id: NEW, label: 'Nouvelle note' },
@@ -54,7 +61,8 @@ export function QuickCapture({ mode, nodes, onDone }: Props) {
   }, [mode, nodes])
 
   const saved = read()[mode]
-  const [target, setTarget] = useState(targets.some((t) => t.id === saved) ? saved : targets[0]?.id ?? '')
+  // Tâche : par défaut « sans projet ». Note : on reprend la dernière destination.
+  const [target, setTarget] = useState(mode === 'note' && targets.some((t) => t.id === saved) ? saved : targets[0]?.id ?? '')
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
   const [busy, setBusy] = useState(false)
@@ -70,10 +78,13 @@ export function QuickCapture({ mode, nodes, onDone }: Props) {
     if (!canSave || busy) return
     setBusy(true)
     try {
-      remember(mode, target)
+      if (mode === 'note') remember(mode, target)
       if (mode === 'todo') {
         await appendTask(target, text.trim())
-        onDone(`Tâche ajoutée à « ${targets.find((t) => t.id === target)?.label ?? 'Todo'} ».`)
+        {
+          const l = targets.find((t) => t.id === target)?.label ?? ''
+          onDone(l.startsWith('Projet : ') ? `Tâche ajoutée au projet « ${l.slice(9)} ».` : 'Tâche ajoutée à la Todo générale.')
+        }
       } else if (target === NEW) {
         await createCapturedNote(title, text)
         onDone('Note créée.')
