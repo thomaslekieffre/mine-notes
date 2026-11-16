@@ -12,11 +12,12 @@ import { restoreNode } from './store/tree'
 import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
 import { QuickCapture } from './components/QuickCapture'
+import { createDemo } from './store/demo'
 import type { QuickMode } from './components/QuickCapture'
 import { matches, pretty, toGlobalAccel, useShortcuts } from './store/shortcuts'
 import { isTauri } from './store/platform'
 import { Mascot } from './components/Mascot'
-import { countDescendants, createNode, ensureDailyNote, renameNode, trashNode, useTree } from './store/tree'
+import { countDescendants, createNode, ensureDailyNote, getFlag, getTreeNodes, setFlag, renameNode, trashNode, useTree } from './store/tree'
 import type { NodeType, NoteKind, TreeNode } from './store/tree'
 import { usePersistentState } from './store/usePersistentState'
 
@@ -237,6 +238,18 @@ export default function App() {
     return () => clearTimeout(t)
   }, [undo])
 
+  // Première ouverture : on crée une fois le dossier de démonstration.
+  useEffect(() => {
+    if (!ready || getFlag('demoCreated')) return
+    setFlag('demoCreated')
+    void createDemo().then((id) => {
+      const note = getTreeNodes().find((n) => n.id === id)
+      if (note?.parentId) expand(note.parentId)
+      openNote(id)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready])
+
   // Raccourcis de capture rapide : globaux dans l'app Mac, locaux dans un navigateur.
   useEffect(() => {
     const open = (mode: QuickMode, fromOutside: boolean) => setQuick({ mode, fromOutside })
@@ -356,6 +369,14 @@ export default function App() {
           onOpenData={() => {
             setSettingsOpen(false)
             setDataOpen(true)
+          }}
+          onDemo={() => {
+            setSettingsOpen(false)
+            void createDemo().then((id) => {
+              const note = getTreeNodes().find((n) => n.id === id)
+              if (note?.parentId) expand(note.parentId)
+              openNote(id)
+            })
           }}
           onClose={() => setSettingsOpen(false)}
         />

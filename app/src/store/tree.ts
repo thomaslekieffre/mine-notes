@@ -406,3 +406,8 @@ export function ensureDailyNote(d = new Date()): { noteId: string; folderId: str
   put({ id: noteId, parentId: folderId, type: 'note', kind: 'journal', name: dayTitle(d), order: -Number(key.replace(/-/g, '')), day: key })
   return { noteId, folderId }
 }
+
+
+/** Indicateurs simples stockés avec l'arborescence (ex. « la démo a déjà été créée »). */
+export const getFlag = (key: string): boolean => yMeta.get(key) === true
+export const setFlag = (key: string) => yMeta.set(key, true)

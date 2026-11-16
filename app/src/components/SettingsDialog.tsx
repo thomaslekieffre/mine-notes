@@ -42,6 +42,7 @@ interface Props {
   theme: Theme
   onTheme: (t: Theme) => void
   onOpenData: () => void
+  onDemo: () => void
   onClose: () => void
 }
 
@@ -103,7 +104,7 @@ function KeyRow({ def }: { def: ShortcutDef }) {
   )
 }
 
-export function SettingsDialog({ theme, onTheme, onOpenData, onClose }: Props) {
+export function SettingsDialog({ theme, onTheme, onOpenData, onDemo, onClose }: Props) {
   const p = usePrefs()
   const set = <K extends keyof Prefs>(k: K) => (v: Prefs[K]) => setPrefs({ [k]: v } as Partial<Prefs>)
 
@@ -181,6 +182,15 @@ export function SettingsDialog({ theme, onTheme, onOpenData, onClose }: Props) {
             </span>
             <button type="button" className="btn" onClick={onOpenData}>
               Ouvrir…
+            </button>
+          </div>
+          <div className="set-row">
+            <span>
+              Note de démonstration
+              <small>Crée un dossier « Démo Mine » qui utilise toutes les fonctionnalités.</small>
+            </span>
+            <button type="button" className="btn" onClick={onDemo}>
+              Créer
             </button>
           </div>
         </section>
