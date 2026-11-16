@@ -13,7 +13,7 @@ import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
 import { QuickCapture } from './components/QuickCapture'
 import type { QuickMode } from './components/QuickCapture'
-import { matches, useQuickKeys } from './store/shortcuts'
+import { matches, pretty, useShortcuts } from './store/shortcuts'
 import { isTauri } from './store/platform'
 import { Mascot } from './components/Mascot'
 import { countDescendants, createNode, ensureDailyNote, renameNode, trashNode, useTree } from './store/tree'
@@ -68,7 +68,7 @@ export default function App() {
   const [undo, setUndo] = useState<{ id: string; name: string } | null>(null)
   const [quick, setQuick] = useState<{ mode: QuickMode; fromOutside: boolean } | null>(null)
   const [flash, setFlash] = useState<string | null>(null)
-  const quickKeys = useQuickKeys()
+  const keys = useShortcuts()
 
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
 
@@ -207,20 +207,19 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const mod = e.metaKey || e.ctrlKey
-      if (mod && e.key.toLowerCase() === 'p') {
+      if (matches('palette', e)) {
         e.preventDefault()
         setPaletteOpen(true)
-      } else if (mod && !e.altKey && e.key.toLowerCase() === 'n') {
+      } else if (matches('newNote', e)) {
         e.preventDefault()
         create('note')
-      } else if (mod && e.key.toLowerCase() === 'w' && ui.activeId) {
+      } else if (matches('closeTab', e) && ui.activeId) {
         e.preventDefault()
         closeTab(ui.activeId)
-      } else if (mod && e.key === ',') {
+      } else if (matches('settings', e)) {
         e.preventDefault()
         setSettingsOpen(true)
-      } else if (e.key === 'F2' && selectedId) {
+      } else if (matches('rename', e) && selectedId) {
         e.preventDefault()
         setRenamingId(selectedId)
       }
@@ -243,10 +242,10 @@ export default function App() {
     const open = (mode: QuickMode, fromOutside: boolean) => setQuick({ mode, fromOutside })
     if (!isTauri()) {
       const onKey = (e: KeyboardEvent) => {
-        if (matches(quickKeys.note, e)) {
+        if (matches('quickNote', e)) {
           e.preventDefault()
           open('note', false)
-        } else if (matches(quickKeys.todo, e)) {
+        } else if (matches('quickTodo', e)) {
           e.preventDefault()
           open('todo', false)
         }
@@ -270,11 +269,11 @@ export default function App() {
       for (const mode of ['note', 'todo'] as const) {
         if (cancelled) return
         try {
-          await gs.register(quickKeys[mode], (ev) => {
+          await gs.register(keys[mode === 'note' ? 'quickNote' : 'quickTodo'], (ev) => {
             if (ev.state === 'Pressed') void summon(mode)
           })
         } catch (e) {
-          console.warn(`Raccourci « ${quickKeys[mode]} » indisponible :`, e)
+          console.warn(`Raccourci « ${keys[mode === 'note' ? 'quickNote' : 'quickTodo']} » indisponible :`, e)
         }
       }
     })()
@@ -282,7 +281,7 @@ export default function App() {
       cancelled = true
       void import('@tauri-apps/plugin-global-shortcut').then((gs) => gs.unregisterAll())
     }
-  }, [quickKeys])
+  }, [keys.quickNote, keys.quickTodo])
 
   useEffect(() => {
     if (!flash) return
@@ -341,7 +340,7 @@ export default function App() {
             <Mascot size={110} />
             <h2>Aucune note ouverte</h2>
             <p>
-              <kbd>⌘P</kbd> pour chercher une note · <kbd>⌘N</kbd> pour en créer une · clic droit dans
+              <kbd>{pretty(keys.palette)}</kbd> pour chercher une note · <kbd>{pretty(keys.newNote)}</kbd> pour en créer une · clic droit dans
               l'arborescence pour un dossier ou un projet.
             </p>
           </div>

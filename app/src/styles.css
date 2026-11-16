@@ -630,3 +630,6 @@ math-field:focus-within { border-color: var(--accent); outline: none; }
 .todo-hint { margin-top: 14px; font-size: 12px; color: var(--muted); }
 .todo-row .note-link { margin-left: 8px; }
 .todo-row .note-link { background-color: color-mix(in srgb, var(--c-blue) 16%, transparent); }
+
+.set-sub { margin: 12px 0 2px; font-size: 12px; font-weight: 600; color: var(--text2); }
+.key-error { color: var(--danger) !important; }

@@ -3,6 +3,7 @@ import type { DragEvent, MouseEvent } from 'react'
 import { Icon, nodeIcon } from './Icon'
 import type { IconName } from './Icon'
 import { Mascot } from './Mascot'
+import { pretty, useShortcuts } from '../store/shortcuts'
 import { moveNode, moveToRoot } from '../store/tree'
 import type { DropPosition, NodeType, NoteKind, TreeNode } from '../store/tree'
 
@@ -75,6 +76,7 @@ function RenameInput({
 
 export function Sidebar(props: Props) {
   const { nodes, selectedId, activeId, expanded, renamingId } = props
+  const keys = useShortcuts()
   const [menu, setMenu] = useState<MenuState | null>(null)
   const [drop, setDrop] = useState<{ id: string; pos: DropPosition } | null>(null)
   const dragId = useRef<string | null>(null)
@@ -217,7 +219,7 @@ export function Sidebar(props: Props) {
         <button type="button" className="icon-btn" aria-label="Nouveau projet" title="Nouveau projet" onClick={() => props.onCreate('project')}>
           <Icon name="projectPlus" />
         </button>
-        <button type="button" className="icon-btn" aria-label="Réglages" title="Réglages (⌘,)" onClick={props.onOpenSettings}>
+        <button type="button" className="icon-btn" aria-label="Réglages" title={`Réglages (${pretty(keys.settings)})`} onClick={props.onOpenSettings}>
           <Icon name="settings" />
         </button>
       </div>
@@ -225,7 +227,7 @@ export function Sidebar(props: Props) {
       <button type="button" className="search-pill" onClick={props.onOpenPalette}>
         <Icon name="search" size={14} />
         <span className="grow">Aller à une note…</span>
-        <kbd>⌘P</kbd>
+        <kbd>{pretty(keys.palette)}</kbd>
       </button>
 
       <button type="button" className="row overview" style={{ margin: '0 6px 2px', paddingLeft: 8 }} onClick={props.onOpenToday} title="Note du jour (⌘D)">

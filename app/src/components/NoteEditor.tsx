@@ -4,6 +4,7 @@ import { DragHandle } from '@tiptap/extension-drag-handle-react'
 import { buildExtensions } from '../extensions/schema'
 import { ImagePaste } from '../extensions/ImageBlock'
 import { MoveBlock } from '../extensions/MoveBlock'
+import { matches } from '../store/shortcuts'
 import { Search } from '../extensions/Search'
 import { mathBridge } from '../extensions/mathBridge'
 import { SearchBar } from './SearchBar'
@@ -135,7 +136,7 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
       setMath({ kind: n.type.name === 'blockMath' ? 'block' : 'inline', latex: String(n.attrs.latex ?? ''), pos })
     mathBridge.create = (kind) => setMath({ kind, latex: '', pos: null })
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'f') {
+      if (matches('findInNote', e)) {
         e.preventDefault()
         setSearchOpen(true)
       }

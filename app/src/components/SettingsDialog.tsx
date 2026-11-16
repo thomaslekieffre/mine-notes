@@ -2,9 +2,17 @@ import { Icon } from './Icon'
 import { Mascot } from './Mascot'
 import { setPrefs, usePrefs } from '../store/prefs'
 import type { Prefs } from '../store/prefs'
-import { isTauri } from '../store/platform'
-import { accelFromEvent, pretty, setQuickKey, useQuickKeys } from '../store/shortcuts'
-import type { QuickKeys } from '../store/shortcuts'
+import { isTauri, openExternal } from '../store/platform'
+import {
+  SHORTCUTS,
+  accelFromEvent,
+  pretty,
+  resetAllShortcuts,
+  resetShortcut,
+  setShortcut,
+  useShortcuts,
+} from '../store/shortcuts'
+import type { ShortcutDef } from '../store/shortcuts'
 import { useEffect, useState } from 'react'
 import type { Theme } from '../App'
 
@@ -37,19 +45,17 @@ interface Props {
   onClose: () => void
 }
 
-const SHORTCUTS: [string, string][] = [
-  ['⌘P', 'Aller à une note / chercher dans le texte'],
-  ['⌘N', 'Nouvelle note'],
-  ['⌘W', "Fermer l'onglet"],
-  ['⌘,', 'Réglages'],
-  ['F2', 'Renommer'],
-  ['/', 'Insérer un bloc (colonnes, schéma, tableau…)'],
-  ['Alt + ↑ / ↓', 'Monter ou descendre le bloc'],
+const FIXED: [string, string][] = [
+  ['/', 'Insérer un bloc (colonnes, schéma, formule, tableau…)'],
+  ['[[', 'Lier une page, ou en créer une'],
 ]
 
-function KeyRow({ which, title, hint }: { which: keyof QuickKeys; title: string; hint: string }) {
-  const keys = useQuickKeys()
+const REPO = 'https://github.com/thomaslekieffre/mine-notes'
+
+function KeyRow({ def }: { def: ShortcutDef }) {
+  const keys = useShortcuts()
   const [rec, setRec] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   useEffect(() => {
     if (!rec) return
     const onKey = (e: KeyboardEvent) => {
@@ -57,25 +63,41 @@ function KeyRow({ which, title, hint }: { which: keyof QuickKeys; title: string;
       e.stopPropagation()
       if (e.key === 'Escape') return setRec(false)
       const a = accelFromEvent(e)
-      if (a) {
-        setQuickKey(which, a)
-        setRec(false)
-      }
+      if (!a) return setError('Ajoute ⌘, ⌃ ou ⌥ à la touche.')
+      const clash = setShortcut(def.id, a)
+      if (clash) return setError(`Déjà utilisé par « ${clash.label} ».`)
+      setError(null)
+      setRec(false)
     }
     window.addEventListener('keydown', onKey, true)
     return () => window.removeEventListener('keydown', onKey, true)
-  }, [rec, which])
+  }, [rec, def.id])
+  const changed = keys[def.id] !== def.default
   return (
     <div className="set-row">
       <span>
-        {title}
-        <small>{hint}</small>
+        {def.label}
+        <small className={error ? 'key-error' : undefined}>
+          {error ?? (def.global ? (isTauri() ? def.hint : 'Dans le navigateur : seulement quand cet onglet est actif.') : def.hint)}
+        </small>
       </span>
-      <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <span className="key-chip">{rec ? 'Appuie sur la combinaison…' : pretty(keys[which])}</span>
-        <button type="button" className="btn" onClick={() => setRec((v) => !v)}>
+      <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        <span className="key-chip">{rec ? 'Appuie sur la combinaison…' : pretty(keys[def.id])}</span>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => {
+            setError(null)
+            setRec((v) => !v)
+          }}
+        >
           {rec ? 'Annuler' : 'Changer'}
         </button>
+        {changed && !rec && (
+          <button type="button" className="icon-btn" title={`Revenir à ${pretty(def.default)}`} aria-label={`Réinitialiser ${def.label}`} onClick={() => resetShortcut(def.id)}>
+            <Icon name="x" size={14} />
+          </button>
+        )}
       </span>
     </div>
   )
@@ -151,12 +173,6 @@ export function SettingsDialog({ theme, onTheme, onOpenData, onClose }: Props) {
         </section>
 
         <section className="set-section">
-          <h4>Capture rapide</h4>
-          <KeyRow which="note" title="Écrire une note" hint={isTauri() ? 'Marche partout sur le Mac, même quand Mine est en arrière-plan.' : 'Dans le navigateur : seulement quand cet onglet est actif.'} />
-          <KeyRow which="todo" title="Ajouter une tâche" hint="Ouvre une petite fenêtre pour saisir une todo." />
-        </section>
-
-        <section className="set-section">
           <h4>Données</h4>
           <div className="set-row">
             <span>
@@ -171,13 +187,27 @@ export function SettingsDialog({ theme, onTheme, onOpenData, onClose }: Props) {
 
         <section className="set-section">
           <h4>Raccourcis</h4>
+          {Array.from(new Set(SHORTCUTS.map((d) => d.group))).map((g) => (
+            <div key={g}>
+              <div className="set-sub">{g}</div>
+              {SHORTCUTS.filter((d) => d.group === g).map((d) => (
+                <KeyRow key={d.id} def={d} />
+              ))}
+            </div>
+          ))}
+          <div className="set-sub">Dans l'éditeur (fixes)</div>
           <div className="set-keys">
-            {SHORTCUTS.map(([k, text]) => (
+            {FIXED.map(([k, text]) => (
               <span key={k} style={{ display: 'contents' }}>
                 <kbd>{k}</kbd>
                 <span>{text}</span>
               </span>
             ))}
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <button type="button" className="btn" onClick={resetAllShortcuts}>
+              Tout réinitialiser
+            </button>
           </div>
         </section>
 
@@ -186,11 +216,19 @@ export function SettingsDialog({ theme, onTheme, onOpenData, onClose }: Props) {
           <div className="set-about">
             <Mascot size={56} />
             <span style={{ fontSize: 13 }}>
-              <strong>Mine</strong> · version 0.1.0
+              <strong>Mine</strong> · version {__APP_VERSION__}
+              <small style={{ display: 'block', color: 'var(--muted)', marginTop: 2 }}>
+                Projet open source <strong>mine-notes</strong> · licence MIT
+              </small>
               <small style={{ display: 'block', color: 'var(--muted)', marginTop: 2 }}>
                 Mes notes, chez moi. Aucune donnée ne quitte cet appareil.
               </small>
             </span>
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <button type="button" className="btn" onClick={() => openExternal(REPO)}>
+              Voir mine-notes sur GitHub
+            </button>
           </div>
         </section>
       </div>

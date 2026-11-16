@@ -1,7 +1,9 @@
 import { Extension } from '@tiptap/core'
+import { Plugin } from '@tiptap/pm/state'
+import { matches } from '../store/shortcuts'
 import { TextSelection } from '@tiptap/pm/state'
 
-/** Alt+↑ / Alt+↓ : fait monter ou descendre le bloc où se trouve le curseur (dans le document ou une colonne). */
+/** Raccourcis « Monter / Descendre le bloc » (Alt+↑ / Alt+↓ par défaut) : fait monter ou descendre le bloc où se trouve le curseur (dans le document ou une colonne). */
 function move(dir: -1 | 1) {
   return ({ editor }: { editor: import('@tiptap/core').Editor }) => {
     const { state, view } = editor
@@ -33,7 +35,19 @@ function move(dir: -1 | 1) {
 
 export const MoveBlock = Extension.create({
   name: 'moveBlock',
-  addKeyboardShortcuts() {
-    return { 'Alt-ArrowUp': move(-1), 'Alt-ArrowDown': move(1) }
+  // Les touches se lisent à chaque frappe : elles suivent les réglages sans recréer l'éditeur.
+  addProseMirrorPlugins() {
+    const editor = this.editor
+    return [
+      new Plugin({
+        props: {
+          handleKeyDown: (_view, event) => {
+            if (matches('blockUp', event)) return move(-1)({ editor })
+            if (matches('blockDown', event)) return move(1)({ editor })
+            return false
+          },
+        },
+      }),
+    ]
   },
 })
