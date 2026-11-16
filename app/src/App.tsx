@@ -7,10 +7,12 @@ import { TodoOverview } from './components/TodoOverview'
 import { DataDialog } from './components/DataDialog'
 import { StatusBar } from './components/StatusBar'
 import { SettingsDialog } from './components/SettingsDialog'
+import { TrashDialog } from './components/TrashDialog'
+import { restoreNode } from './store/tree'
 import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
 import { Mascot } from './components/Mascot'
-import { countDescendants, createNode, removeNode, renameNode, useTree } from './store/tree'
+import { countDescendants, createNode, renameNode, trashNode, useTree } from './store/tree'
 import type { NodeType, NoteKind, TreeNode } from './store/tree'
 import { usePersistentState } from './store/usePersistentState'
 
@@ -41,7 +43,7 @@ const DEFAULT_NAMES: Record<NodeType, string> = {
 }
 
 export default function App() {
-  const { ready, nodes } = useTree()
+  const { ready, nodes, trash } = useTree()
   useMirror(nodes, ready)
   const [ui, setUi] = usePersistentState<UiState>('mine-ui', {
     openTabs: [],
@@ -58,6 +60,8 @@ export default function App() {
   const [words, setWords] = useState<number | null>(null)
   const [dataOpen, setDataOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [trashOpen, setTrashOpen] = useState(false)
+  const [undo, setUndo] = useState<{ id: string; name: string } | null>(null)
 
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
 
@@ -176,8 +180,9 @@ export default function App() {
 
   const confirmDelete = () => {
     if (!toDelete) return
-    const ids = removeNode(toDelete.id)
+    const ids = trashNode(toDelete.id)
     setSelectedId((s) => (s && ids.includes(s) ? null : s))
+    setUndo({ id: toDelete.id, name: toDelete.name })
     setToDelete(null)
   }
 
@@ -214,11 +219,19 @@ export default function App() {
   const cycleTheme = () =>
     setUi((u) => ({ ...u, theme: u.theme === 'system' ? 'light' : u.theme === 'light' ? 'dark' : 'system' }))
 
+  useEffect(() => {
+    if (!undo) return
+    const t = setTimeout(() => setUndo(null), 7000)
+    return () => clearTimeout(t)
+  }, [undo])
+
   const delCount = toDelete ? countDescendants(toDelete.id) : 0
 
   return (
     <div className={sidebarOpen ? 'app sidebar-open' : 'app'}>
       <Sidebar
+        trashCount={trash.length}
+        onOpenTrash={() => setTrashOpen(true)}
         onOpenSettings={() => setSettingsOpen(true)}
         nodes={nodes}
         selectedId={selectedId}
@@ -293,22 +306,42 @@ export default function App() {
         />
       )}
 
+      {trashOpen && (
+        <TrashDialog
+          onClose={() => setTrashOpen(false)}
+          onRestore={() => setUndo(null)}
+        />
+      )}
+
+      {undo && (
+        <div className="toast" role="status">
+          <span>« {undo.name} » est à la corbeille.</span>
+          <button
+            type="button"
+            onClick={() => {
+              restoreNode(undo.id)
+              setUndo(null)
+            }}
+          >
+            Annuler
+          </button>
+        </div>
+      )}
+
       {toDelete && (
         <div className="overlay center" onMouseDown={() => setToDelete(null)}>
           <div className="dialog" role="alertdialog" aria-label="Confirmer la suppression" onMouseDown={(e) => e.stopPropagation()}>
-            <h3>Supprimer « {toDelete.name} » ?</h3>
+            <h3>Mettre « {toDelete.name} » à la corbeille ?</h3>
             <p>
-              {delCount > 0
-                ? `Les ${delCount} éléments qu'il contient seront supprimés aussi. `
-                : ''}
-              Cette action est définitive.
+              {delCount > 0 ? `Les ${delCount} éléments qu'il contient iront avec lui. ` : ''}
+              Tu pourras le restaurer depuis la corbeille.
             </p>
             <div className="dialog-actions">
               <button type="button" className="btn" onClick={() => setToDelete(null)}>
                 Annuler
               </button>
               <button type="button" className="btn danger" autoFocus onClick={confirmDelete}>
-                Supprimer
+                Mettre à la corbeille
               </button>
             </div>
           </div>

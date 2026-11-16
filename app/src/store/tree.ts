@@ -14,11 +14,16 @@ export interface TreeNode {
   kind: NoteKind
   name: string
   order: number
+  /** Présent quand l'élément a été mis à la corbeille (date en ms). Ses enfants le suivent. */
+  trashedAt?: number
 }
 
 interface TreeState {
   ready: boolean
+  /** Éléments visibles (hors corbeille). */
   nodes: TreeNode[]
+  /** Éléments mis à la corbeille, du plus récent au plus ancien. */
+  trash: TreeNode[]
 }
 
 // L'arborescence est un document Yjs : chaque nœud est une Y.Map, ce qui permettra
@@ -28,13 +33,25 @@ const persistence = new IndexeddbPersistence('mine-tree', doc)
 const yNodes = doc.getMap<Y.Map<unknown>>('nodes')
 const yMeta = doc.getMap<unknown>('meta')
 
-let state: TreeState = { ready: false, nodes: [] }
+let state: TreeState = { ready: false, nodes: [], trash: [] }
 const listeners = new Set<() => void>()
 
+const allNodes = () => Array.from(yNodes.values()).map((m) => m.toJSON() as TreeNode)
+
 function recompute(ready = state.ready) {
+  const all = allNodes()
+  const byId = new Map(all.map((n) => [n.id, n]))
+  // Un élément est caché s'il est à la corbeille ou si l'un de ses parents l'est.
+  const hidden = (n: TreeNode): boolean => {
+    for (let p: TreeNode | undefined = n, guard = 0; p && guard < 100; p = p.parentId ? byId.get(p.parentId) : undefined, guard++) {
+      if (p.trashedAt) return true
+    }
+    return false
+  }
   state = {
     ready,
-    nodes: Array.from(yNodes.values()).map((m) => m.toJSON() as TreeNode),
+    nodes: all.filter((n) => !hidden(n)),
+    trash: all.filter((n) => n.trashedAt).sort((a, b) => (b.trashedAt ?? 0) - (a.trashedAt ?? 0)),
   }
   listeners.forEach((l) => l())
 }
@@ -62,7 +79,7 @@ function put(node: TreeNode) {
 function siblings(parentId: string | null): TreeNode[] {
   return Array.from(yNodes.values())
     .map((m) => m.toJSON() as TreeNode)
-    .filter((n) => n.parentId === parentId)
+    .filter((n) => n.parentId === parentId && !n.trashedAt)
     .sort((a, b) => a.order - b.order)
 }
 
@@ -226,8 +243,45 @@ export function renameNode(id: string, name: string) {
   if (m) m.set('name', name)
 }
 
-export function removeNode(id: string): string[] {
+/** Tous les descendants, corbeille comprise. */
+function allDescendants(id: string): string[] {
+  const all = allNodes()
+  const out: string[] = []
+  const walk = (pid: string) => {
+    for (const n of all) {
+      if (n.parentId === pid) {
+        out.push(n.id)
+        walk(n.id)
+      }
+    }
+  }
+  walk(id)
+  return out
+}
+
+/** Met un élément (et tout ce qu'il contient) à la corbeille. Renvoie les identifiants qui disparaissent de la vue. */
+export function trashNode(id: string): string[] {
   const ids = [id, ...descendants(id)]
+  yNodes.get(id)?.set('trashedAt', Date.now())
+  return ids
+}
+
+/** Sort un élément de la corbeille. Si son dossier d'origine n'existe plus ou est à la corbeille, il revient à la racine. */
+export function restoreNode(id: string) {
+  const m = yNodes.get(id)
+  if (!m) return
+  const parentId = (m.get('parentId') as string | null) ?? null
+  const parentVisible = parentId !== null && state.nodes.some((n) => n.id === parentId)
+  doc.transact(() => {
+    m.delete('trashedAt')
+    if (!parentVisible) m.set('parentId', null)
+    m.set('order', nextOrder((m.get('parentId') as string | null) ?? null))
+  })
+}
+
+/** Suppression définitive (vide aussi les notes et les types de blocs du projet). */
+export function purgeNode(id: string) {
+  const ids = [id, ...allDescendants(id)]
   const noteIds = ids.filter((i) => yNodes.get(i)?.get('type') === 'note')
   doc.transact(() => {
     ids.forEach((i) => yNodes.delete(i))
@@ -235,7 +289,27 @@ export function removeNode(id: string): string[] {
     for (const [tid, m] of Array.from(yTypes.entries())) if (ids.includes(String(m.get('projectId')))) yTypes.delete(tid)
   })
   noteIds.forEach((i) => void destroyNoteDoc(i))
-  return ids
+}
+
+export function emptyTrash() {
+  for (const n of state.trash) purgeNode(n.id)
+}
+
+/** Nombre d'éléments contenus dans un élément de la corbeille (lui non compris). */
+export function trashedContentCount(id: string): number {
+  return allDescendants(id).length
+}
+
+/** Chemin d'origine d'un élément (ses dossiers parents), même s'ils sont à la corbeille. */
+export function originPath(id: string): string {
+  const byId = new Map(allNodes().map((n) => [n.id, n]))
+  const parts: string[] = []
+  let p = byId.get(id)?.parentId ? byId.get(byId.get(id)!.parentId!) : undefined
+  while (p) {
+    parts.unshift(p.name)
+    p = p.parentId ? byId.get(p.parentId) : undefined
+  }
+  return parts.join(' › ')
 }
 
 export function countDescendants(id: string): number {

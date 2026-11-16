@@ -23,6 +23,8 @@ interface Props {
   onOpenPalette: () => void
   onOpenTodos: () => void
   onOpenSettings: () => void
+  trashCount: number
+  onOpenTrash: () => void
   todosActive: boolean
 }
 
@@ -193,7 +195,7 @@ export function Sidebar(props: Props) {
     if (n) {
       items.push(
         { label: 'Renommer', icon: 'rename', run: () => props.onStartRename(n.id) },
-        { label: 'Supprimer', icon: 'trash', run: () => props.onDelete(n), danger: true },
+        { label: 'Mettre à la corbeille', icon: 'trash', run: () => props.onDelete(n), danger: true },
       )
     }
     return items
@@ -258,6 +260,12 @@ export function Sidebar(props: Props) {
         {renderRows(null, 0)}
         {nodes.length === 0 && <div className="tree-empty">Aucune note pour l'instant.</div>}
       </div>
+
+      <button type="button" className="row trash-btn" onClick={props.onOpenTrash}>
+        <Icon name="trash" size={14} />
+        <span className="row-name">Corbeille</span>
+        {props.trashCount > 0 && <span className="trash-count">{props.trashCount}</span>}
+      </button>
 
       {menu && (
         <div
