@@ -65,6 +65,8 @@ const PATHS = {
   chart: 'M4 20V4M4 20h16M8 16v-4M12 16V8M16 16v-6',
   wrench: 'M15 6a4 4 0 0 0-5 5L4 17l3 3 6-6a4 4 0 0 0 5-5l-3 3-2-1-1-2z',
   trophy: 'M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8M10 18h4',
+  printer: 'M7 9V3h10v6M7 17H4v-7h16v7h-3M7 14h10v7H7z',
+  history: 'M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2',
   shapes: 'M3 4h8v8H3zM17 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8zM6 20l4-6 4 6z',
 } as const
 

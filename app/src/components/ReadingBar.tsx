@@ -14,10 +14,11 @@ interface Props {
   pen: PenSettings
   onPen: (patch: Partial<PenSettings>) => void
   onClear: () => void
+  onPrint: () => void
 }
 
 /** Barre flottante du mode lecture : stylo qui s'efface, surligneur, couleurs. */
-export function ReadingBar({ pen, onPen, onClear }: Props) {
+export function ReadingBar({ pen, onPen, onClear, onPrint }: Props) {
   return (
     <div className="reading-bar" role="toolbar" aria-label="Mode lecture">
       <span className="rb-title">
@@ -62,6 +63,9 @@ export function ReadingBar({ pen, onPen, onClear }: Props) {
           </button>
         </>
       )}
+      <button type="button" className="rb-btn" onClick={onPrint} title="Exporter en PDF">
+        <Icon name="printer" size={14} /> PDF
+      </button>
       <button type="button" className="rb-btn" onClick={() => setReading(false)} title="Quitter le mode lecture">
         Modifier
       </button>

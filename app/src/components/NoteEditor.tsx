@@ -15,6 +15,7 @@ import { PenLayer } from './PenLayer'
 import type { PenSettings } from './PenLayer'
 import { ReadingBar } from './ReadingBar'
 import { useReading } from '../store/reading'
+import { printPage } from '../store/platform'
 import type { Node as PMNode } from '@tiptap/pm/model'
 import type { SlashItem } from '../extensions/SlashCommand'
 import { SlashCommand } from '../extensions/SlashCommand'
@@ -147,6 +148,9 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
       if (matches('findInNote', e)) {
         e.preventDefault()
         setSearchOpen(true)
+      } else if (matches('exportPdf', e)) {
+        e.preventDefault()
+        void printPage()
       }
     }
     window.addEventListener('keydown', onKey)
@@ -183,6 +187,7 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
           editor={editor}
           onToggleOutline={() => setOutlineOpen((v) => !v)}
           onToggleSearch={() => setSearchOpen((v) => !v)}
+          onPrint={() => void printPage()}
         />
       )}
       <div className="doc-scroll" ref={setScroller}>
@@ -218,7 +223,7 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
         </div>
       </div>
       {reading && (
-        <ReadingBar pen={pen} onPen={(patch) => setPen((p) => ({ ...p, ...patch }))} onClear={() => setClearSignal((n) => n + 1)} />
+        <ReadingBar onPrint={() => void printPage()} pen={pen} onPen={(patch) => setPen((p) => ({ ...p, ...patch }))} onClear={() => setClearSignal((n) => n + 1)} />
       )}
       {reading && scroller && <PenLayer scroller={scroller} pen={pen} clearSignal={clearSignal} />}
       {searchOpen && editor && <SearchBar editor={editor} onClose={() => { setSearchOpen(false); editor.commands.focus() }} />}

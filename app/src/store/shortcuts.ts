@@ -11,6 +11,8 @@ export type ShortcutId =
   | 'rename'
   | 'findInNote'
   | 'readMode'
+  | 'exportPdf'
+  | 'history'
   | 'blockUp'
   | 'blockDown'
   | 'quickNote'
@@ -34,6 +36,8 @@ export const SHORTCUTS: ShortcutDef[] = [
   { id: 'settings', label: 'Réglages', group: 'Navigation', default: 'Command+,' },
   { id: 'rename', label: 'Renommer', hint: "L'élément sélectionné dans l'arborescence", group: 'Navigation', default: 'F2' },
   { id: 'findInNote', label: 'Rechercher dans la note', group: 'Édition', default: 'Command+F' },
+  { id: 'exportPdf', label: 'Exporter en PDF', hint: 'Ouvre l’impression ; choisis « Enregistrer au format PDF »', group: 'Édition', default: 'Command+Shift+E' },
+  { id: 'history', label: 'Historique de la note', group: 'Édition', default: 'Command+Shift+H' },
   { id: 'readMode', label: 'Mode lecture', hint: 'Bloque l’écriture et active le stylo pour réviser', group: 'Édition', default: 'Command+E' },
   { id: 'blockUp', label: 'Monter le bloc', group: 'Édition', default: 'Alt+ArrowUp' },
   { id: 'blockDown', label: 'Descendre le bloc', group: 'Édition', default: 'Alt+ArrowDown' },

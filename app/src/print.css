@@ -1,0 +1,26 @@
+/* Impression / export PDF d'une note : on ne garde que le document, en clair, sur fond blanc. */
+:root, :root[data-theme] {
+  color-scheme: light;
+  --bg: #ffffff; --side: #ffffff; --bar: #f4f3f0; --border: #dedcd6;
+  --text: #1c1d20; --text2: #3a3d44; --muted: #6b6e75; --active: #eeece7;
+  --accent: #d99a1e; --on-accent: #1e1f22;
+  --def: #1f5fc9; --ex: #1d7a3a; --exo: #b5560f; --danger: #c0392b;
+  --c-graphite: #5c6068; --c-blue: #1f5fc9; --c-green: #1d7a3a; --c-orange: #b5560f; --c-red: #c0392b; --c-purple: #7b4bd1;
+  --c-l: 40%;
+  --h-yellow: rgba(242, 181, 68, 0.5); --h-green: rgba(60, 190, 110, 0.35);
+  --h-blue: rgba(70, 130, 240, 0.3); --h-pink: rgba(240, 90, 140, 0.3);
+  --diagram-filter: none;
+}
+html, body, #root { height: auto !important; overflow: visible !important; background: #fff !important; color: var(--text); }
+.app { display: block !important; height: auto !important; }
+.sidebar, .tabs, .toolbar, .statusbar, .reading-bar, .pen-layer, .searchbar, .outline, .backdrop, .backlinks, .todo-hint,
+.toast, .overlay, .menu, .slash, .diagram-edit, .code-lang, .sidebar-resizer, .crumbs, .drag-grip, .doc-loading { display: none !important; }
+.main, .doc-scroll { display: block !important; overflow: visible !important; height: auto !important; }
+.doc-wrap { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+.doc-title { font-size: 28px; border: 0; padding: 0; margin-bottom: 14px; }
+.doc { min-height: 0 !important; }
+.doc [data-callout], .doc img, .doc table, .doc pre, .diagram-block, .solution, .doc [data-columns], .doc blockquote, .img-block { break-inside: avoid; }
+.doc h1, .doc h2, .doc h3 { break-after: avoid; }
+.doc [data-type='details'] > div > [data-type='detailsContent'] { display: block !important; }
+* { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+@page { margin: 16mm; }
