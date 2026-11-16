@@ -11,7 +11,8 @@ Pensée pour les idées, les cours, les todo et le journal.
 - **Confort** : recherche et remplacement dans la note (`⌘F`), plan des titres, collage de Markdown, typographie française, emoji `:smile:`, temps de lecture.
 - **Images** (collage, zoom, redimensionnement) et **schémas** (Excalidraw : formes, flèches, main levée).
 - **Arborescence façon IDE** : dossiers, projets avec leur propre todo / idées / journal, onglets, palette `⌘P` avec recherche dans le texte.
-- **Note du jour** (`⌘D`) : crée ou rouvre la note datée d'aujourd'hui, rangée dans « Notes du jour ».
+- **Note du jour** (bouton de la barre latérale) : crée ou rouvre la note datée d'aujourd'hui, rangée dans « Notes du jour ».
+- **Capture rapide** : deux raccourcis (`⌃⌥N` note, `⌃⌥T` tâche, modifiables dans les réglages) ouvrent une petite fenêtre de saisie, même depuis une autre app (app Mac).
 - **Corbeille** : supprimer met à la corbeille (annulable), restauration ou suppression définitive.
 - **Vue « Toutes les todo »** qui agrège les tâches de toutes les notes.
 - **Thèmes clair / sombre**, réglages d'affichage, mascotte animée.

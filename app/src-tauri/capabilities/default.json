@@ -29,6 +29,18 @@
           "path": "/Volumes/**"
         }
       ]
-    }
+    },
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister",
+    "global-shortcut:allow-unregister-all",
+    "global-shortcut:allow-is-registered",
+    "core:app:allow-app-hide",
+    "core:app:allow-app-show",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-set-focus",
+    "core:window:allow-unminimize",
+    "core:window:allow-is-focused",
+    "core:window:allow-is-visible"
   ]
 }

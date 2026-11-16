@@ -11,6 +11,10 @@ import { TrashDialog } from './components/TrashDialog'
 import { restoreNode } from './store/tree'
 import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
+import { QuickCapture } from './components/QuickCapture'
+import type { QuickMode } from './components/QuickCapture'
+import { matches, useQuickKeys } from './store/shortcuts'
+import { isTauri } from './store/platform'
 import { Mascot } from './components/Mascot'
 import { countDescendants, createNode, ensureDailyNote, renameNode, trashNode, useTree } from './store/tree'
 import type { NodeType, NoteKind, TreeNode } from './store/tree'
@@ -62,6 +66,9 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [trashOpen, setTrashOpen] = useState(false)
   const [undo, setUndo] = useState<{ id: string; name: string } | null>(null)
+  const [quick, setQuick] = useState<{ mode: QuickMode; fromOutside: boolean } | null>(null)
+  const [flash, setFlash] = useState<string | null>(null)
+  const quickKeys = useQuickKeys()
 
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
 
@@ -204,15 +211,12 @@ export default function App() {
       if (mod && e.key.toLowerCase() === 'p') {
         e.preventDefault()
         setPaletteOpen(true)
-      } else if (mod && e.key.toLowerCase() === 'n') {
+      } else if (mod && !e.altKey && e.key.toLowerCase() === 'n') {
         e.preventDefault()
         create('note')
       } else if (mod && e.key.toLowerCase() === 'w' && ui.activeId) {
         e.preventDefault()
         closeTab(ui.activeId)
-      } else if (mod && e.key.toLowerCase() === 'd' && !e.shiftKey) {
-        e.preventDefault()
-        openToday()
       } else if (mod && e.key === ',') {
         e.preventDefault()
         setSettingsOpen(true)
@@ -223,7 +227,7 @@ export default function App() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [create, closeTab, openToday, ui.activeId, selectedId])
+  }, [create, closeTab, ui.activeId, selectedId])
 
   const cycleTheme = () =>
     setUi((u) => ({ ...u, theme: u.theme === 'system' ? 'light' : u.theme === 'light' ? 'dark' : 'system' }))
@@ -233,6 +237,58 @@ export default function App() {
     const t = setTimeout(() => setUndo(null), 7000)
     return () => clearTimeout(t)
   }, [undo])
+
+  // Raccourcis de capture rapide : globaux dans l'app Mac, locaux dans un navigateur.
+  useEffect(() => {
+    const open = (mode: QuickMode, fromOutside: boolean) => setQuick({ mode, fromOutside })
+    if (!isTauri()) {
+      const onKey = (e: KeyboardEvent) => {
+        if (matches(quickKeys.note, e)) {
+          e.preventDefault()
+          open('note', false)
+        } else if (matches(quickKeys.todo, e)) {
+          e.preventDefault()
+          open('todo', false)
+        }
+      }
+      window.addEventListener('keydown', onKey)
+      return () => window.removeEventListener('keydown', onKey)
+    }
+    let cancelled = false
+    const summon = async (mode: QuickMode) => {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window')
+      const w = getCurrentWindow()
+      const inFront = (await w.isVisible()) && (await w.isFocused())
+      await w.show()
+      await w.unminimize()
+      await w.setFocus()
+      open(mode, !inFront)
+    }
+    void (async () => {
+      const gs = await import('@tauri-apps/plugin-global-shortcut')
+      await gs.unregisterAll()
+      for (const mode of ['note', 'todo'] as const) {
+        if (cancelled) return
+        try {
+          await gs.register(quickKeys[mode], (ev) => {
+            if (ev.state === 'Pressed') void summon(mode)
+          })
+        } catch (e) {
+          console.warn(`Raccourci « ${quickKeys[mode]} » indisponible :`, e)
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+      void import('@tauri-apps/plugin-global-shortcut').then((gs) => gs.unregisterAll())
+    }
+  }, [quickKeys])
+
+  useEffect(() => {
+    if (!flash) return
+    const t = setTimeout(() => setFlash(null), 2200)
+    return () => clearTimeout(t)
+  }, [flash])
 
   const delCount = toDelete ? countDescendants(toDelete.id) : 0
 
@@ -314,6 +370,26 @@ export default function App() {
           onNewNote={(name) => create('note', undefined, 'note', name)}
           onClose={() => setPaletteOpen(false)}
         />
+      )}
+
+      {quick && (
+        <QuickCapture
+          mode={quick.mode}
+          nodes={nodes}
+          onDone={(message) => {
+            const outside = quick.fromOutside
+            setQuick(null)
+            if (message) setFlash(message)
+            // Appelé depuis une autre app : on rend la main à cette app.
+            if (outside && isTauri()) void import('@tauri-apps/api/app').then((a) => a.hide())
+          }}
+        />
+      )}
+
+      {flash && (
+        <div className="toast" role="status">
+          <span>{flash}</span>
+        </div>
       )}
 
       {trashOpen && (

@@ -3,6 +3,9 @@ import { Mascot } from './Mascot'
 import { setPrefs, usePrefs } from '../store/prefs'
 import type { Prefs } from '../store/prefs'
 import { isTauri } from '../store/platform'
+import { accelFromEvent, pretty, setQuickKey, useQuickKeys } from '../store/shortcuts'
+import type { QuickKeys } from '../store/shortcuts'
+import { useEffect, useState } from 'react'
 import type { Theme } from '../App'
 
 function Seg<T extends string>({
@@ -37,13 +40,46 @@ interface Props {
 const SHORTCUTS: [string, string][] = [
   ['⌘P', 'Aller à une note / chercher dans le texte'],
   ['⌘N', 'Nouvelle note'],
-  ['⌘D', 'Note du jour'],
   ['⌘W', "Fermer l'onglet"],
   ['⌘,', 'Réglages'],
   ['F2', 'Renommer'],
   ['/', 'Insérer un bloc (colonnes, schéma, tableau…)'],
   ['Alt + ↑ / ↓', 'Monter ou descendre le bloc'],
 ]
+
+function KeyRow({ which, title, hint }: { which: keyof QuickKeys; title: string; hint: string }) {
+  const keys = useQuickKeys()
+  const [rec, setRec] = useState(false)
+  useEffect(() => {
+    if (!rec) return
+    const onKey = (e: KeyboardEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (e.key === 'Escape') return setRec(false)
+      const a = accelFromEvent(e)
+      if (a) {
+        setQuickKey(which, a)
+        setRec(false)
+      }
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [rec, which])
+  return (
+    <div className="set-row">
+      <span>
+        {title}
+        <small>{hint}</small>
+      </span>
+      <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <span className="key-chip">{rec ? 'Appuie sur la combinaison…' : pretty(keys[which])}</span>
+        <button type="button" className="btn" onClick={() => setRec((v) => !v)}>
+          {rec ? 'Annuler' : 'Changer'}
+        </button>
+      </span>
+    </div>
+  )
+}
 
 export function SettingsDialog({ theme, onTheme, onOpenData, onClose }: Props) {
   const p = usePrefs()
@@ -112,6 +148,12 @@ export function SettingsDialog({ theme, onTheme, onOpenData, onClose }: Props) {
               options={[['on', 'Oui'], ['off', 'Non']]}
             />
           </div>
+        </section>
+
+        <section className="set-section">
+          <h4>Capture rapide</h4>
+          <KeyRow which="note" title="Écrire une note" hint={isTauri() ? 'Marche partout sur le Mac, même quand Mine est en arrière-plan.' : 'Dans le navigateur : seulement quand cet onglet est actif.'} />
+          <KeyRow which="todo" title="Ajouter une tâche" hint="Ouvre une petite fenêtre pour saisir une todo." />
         </section>
 
         <section className="set-section">
