@@ -8,7 +8,7 @@
 
 ![Vite](https://img.shields.io/badge/Vite-React%2019-646cff?logo=vite&logoColor=white)
 ![TipTap](https://img.shields.io/badge/%C3%89diteur-TipTap%20v3-0b0b0b)
-![Tauri](https://img.shields.io/badge/App%20Mac-Tauri%202-24c8db?logo=tauri&logoColor=white)
+![Tauri](https://img.shields.io/badge/App%20Mac%20%2B%20Windows-Tauri%202-24c8db?logo=tauri&logoColor=white)
 ![Local first](https://img.shields.io/badge/donn%C3%A9es-100%25%20locales-3ba55d)
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
 
@@ -66,6 +66,7 @@
 - **Mode lecture** (`⌘E`) : la note n'est plus modifiable ; un stylo dessine par-dessus (traits qui s'effacent tout seuls, surligneur, ou traits qui restent) pour réviser.
 - **Note de démonstration** : un dossier « Démo Mine » créé au premier lancement (et via les réglages) qui utilise toutes les fonctionnalités.
 - **Notes de todo** : uniquement des cases à cocher, avec des liens `[[page]]` (ou création de la page à la volée) vers les pages qui détaillent chaque tâche.
+- **Échéances** : chaque tâche peut avoir une date (pastille « + date » au bout de la ligne : aujourd'hui, demain, lundi, ou un jour précis) ; en retard en rouge, tri par date dans l'accueil et « Toutes les todo », date possible depuis la capture rapide.
 - **Vue « Toutes les todo »** qui agrège les tâches de toutes les notes.
 - **Thèmes clair / sombre**, réglages d'affichage, mascotte animée.
 - **Données à toi** : sauvegarde JSON complète, export Markdown, et dossier miroir sur le disque (app de bureau).
@@ -75,6 +76,15 @@
 Vite · React 19 · TypeScript · TipTap v3 · Yjs (+ y-indexeddb) · Excalidraw · Tauri 2 (app macOS).
 
 Les notes sont des documents Yjs stockés dans IndexedDB, ce qui prépare une synchronisation entre appareils (pas encore faite).
+
+## Télécharger
+
+Les installeurs (Mac Apple Silicon ou Intel : `.dmg` ; Windows : `.exe` / `.msi`) sont dans les [releases](https://github.com/thomaslekieffre/mine-notes/releases). Ils ne sont pas signés :
+
+- **Mac** : au premier lancement, clic droit sur Mine > Ouvrir (ou Réglages Système > Confidentialité et sécurité > « Ouvrir quand même »).
+- **Windows** : SmartScreen affiche « Windows a protégé votre ordinateur » : clique sur « Informations complémentaires » puis « Exécuter quand même ».
+
+Sur Windows, les raccourcis utilisent `Ctrl` à la place de `⌘` (et `Alt+Maj+N` / `Alt+Maj+T` pour la capture rapide) ; ils restent modifiables dans les réglages.
 
 ## Essayer
 
@@ -89,12 +99,13 @@ Au premier lancement, la note « Démo : toutes les fonctionnalités » te fait 
 
 ### App de bureau (Tauri)
 
-Prérequis : [Rust](https://rustup.rs) et les outils Xcode en ligne de commande.
+Prérequis : [Rust](https://rustup.rs), et les outils Xcode en ligne de commande (Mac) ou les « Outils de génération C++ » de Visual Studio et WebView2 (Windows).
 
 ```bash
 cd app
 npx tauri dev                     # fenêtre de développement
-npx tauri build --bundles app     # Mine.app dans src-tauri/target/release/bundle/macos/
+npx tauri build --bundles app     # Mac : Mine.app dans src-tauri/target/release/bundle/macos/
+npx tauri build                   # Windows : installeurs dans src-tauri/target/release/bundle/
 ```
 
 Les données de l'app de bureau et celles du navigateur sont séparées.
@@ -105,6 +116,14 @@ Le numéro de version est celui de `app/package.json` (affiché dans les réglag
 
 ```bash
 cd app && npm run set-version -- 0.3.0
+```
+
+### Publier une version
+
+Changer le numéro (`npm run set-version -- X.Y.Z`), commit, puis pousser un tag : GitHub Actions construit les installeurs Mac et Windows et prépare une release en brouillon.
+
+```bash
+git tag vX.Y.Z && git push origin vX.Y.Z
 ```
 
 ## État

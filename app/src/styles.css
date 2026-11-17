@@ -474,7 +474,7 @@ body.side-dropping .ProseMirror-dropcursor { display: none !important; }
 .palette-section { padding: 8px 10px 3px; font-size: 10.5px; letter-spacing: 0.08em; font-weight: 600; text-transform: uppercase; color: var(--muted); }
 
 /* ───── Fenêtre Mac (Tauri) : la barre de titre est fondue dans l'interface ───── */
-.tauri .side-head { padding-top: 38px; }
+.tauri.mac .side-head { padding-top: 38px; }
 .tauri .tabs { padding-left: 0; }
 .tauri .tab, .tauri .tabs button { -webkit-app-region: no-drag; }
 .tauri body { user-select: none; }
@@ -675,7 +675,7 @@ body.resizing * { cursor: col-resize !important; }
   .app.sidebar-collapsed .main { grid-column: 1; }
   /* Barre repliée : le bouton de la barre d'onglets la rouvre. */
   .app.sidebar-collapsed .only-mobile { display: inline-flex; width: 36px; height: 36px; flex-shrink: 0; }
-  .tauri .app.sidebar-collapsed .tabs { padding-left: 78px; }
+  .tauri.mac .app.sidebar-collapsed .tabs { padding-left: 78px; }
 }
 
 /* Barre étroite : le nom disparaît et les icônes se resserrent pour ne pas dépasser. */

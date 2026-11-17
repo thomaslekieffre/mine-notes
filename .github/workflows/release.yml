@@ -1,0 +1,52 @@
+name: Release
+
+# Pousser un tag « v0.11.0 » construit Mine pour Mac (Apple Silicon et Intel) et Windows,
+# puis publie les installeurs dans une release GitHub (en brouillon, à relire avant de publier).
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            args: --target aarch64-apple-darwin
+          - os: macos-latest
+            args: --target x86_64-apple-darwin
+          - os: windows-latest
+            args: ''
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: app/src-tauri
+      - run: npm ci
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: app
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Mine ${{ github.ref_name }}'
+          releaseBody: 'Installeurs : `.dmg` pour Mac (Apple Silicon ou Intel), `.exe` / `.msi` pour Windows. Les apps ne sont pas signées : voir le README pour la première ouverture.'
+          releaseDraft: true
+          args: ${{ matrix.args }}

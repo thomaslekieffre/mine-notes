@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { isMac } from './platform'
 
 // Tous les raccourcis de Mine, modifiables dans les réglages.
 // Format d'une combinaison : « Command+P », « Control+Alt+N », « F2 »… (le même que celui de Tauri).
@@ -29,7 +30,7 @@ export interface ShortcutDef {
   global?: boolean
 }
 
-export const SHORTCUTS: ShortcutDef[] = [
+const BASE: ShortcutDef[] = [
   { id: 'palette', label: 'Aller à une note', hint: 'Cherche aussi dans le texte', group: 'Navigation', default: 'Command+P' },
   { id: 'newNote', label: 'Nouvelle note', group: 'Navigation', default: 'Command+N' },
   { id: 'home', label: 'Accueil', hint: 'Tableau de bord : tâches, notes récentes, statistiques', group: 'Navigation', default: 'Command+Shift+D' },
@@ -46,6 +47,15 @@ export const SHORTCUTS: ShortcutDef[] = [
   { id: 'quickNote', label: 'Écrire une note', hint: 'Marche partout sur le Mac, même quand Mine est en arrière-plan', group: 'Capture rapide', default: 'Control+Alt+N', global: true },
   { id: 'quickTodo', label: 'Ajouter une tâche', hint: 'Ouvre une petite fenêtre pour saisir une todo', group: 'Capture rapide', default: 'Control+Alt+T', global: true },
 ]
+
+// Windows / Linux : Ctrl remplace ⌘, et Ctrl+Alt (= AltGr sur un clavier AZERTY) laisse la place à Alt+Maj pour les raccourcis globaux.
+export const SHORTCUTS: ShortcutDef[] = isMac
+  ? BASE
+  : BASE.map((s) => ({
+      ...s,
+      default: s.global ? s.default.replace('Control+Alt', 'Alt+Shift') : s.default.replace('Command', 'Control'),
+      hint: s.hint?.replace('sur le Mac', "sur l'ordinateur"),
+    }))
 
 export type ShortcutMap = Record<ShortcutId, string>
 
@@ -214,7 +224,12 @@ const SYMBOLS: Record<string, string> = {
 
 /** Version lisible : « ⌘P », « ⌃⌥N », « ⌥↑ »… */
 export const pretty = (accel: string) =>
-  accel
-    .split('+')
-    .map((p) => SYMBOLS[p] ?? p)
-    .join('')
+  isMac
+    ? accel
+        .split('+')
+        .map((p) => SYMBOLS[p] ?? p)
+        .join('')
+    : accel
+        .split('+')
+        .map((p) => (p === 'Control' ? 'Ctrl' : (SYMBOLS[p] ?? p)))
+        .join('+')

@@ -20,3 +20,6 @@ export async function printPage() {
     window.print()
   }
 }
+
+/** Mac ? (sinon Windows ou Linux : Ctrl à la place de ⌘, barre de titre native). */
+export const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform || navigator.userAgent)
