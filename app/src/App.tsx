@@ -23,7 +23,7 @@ import { createDemo } from './store/demo'
 import type { QuickMode } from './components/QuickCapture'
 import { matches, toGlobalAccel, useShortcuts } from './store/shortcuts'
 import { isTauri } from './store/platform'
-import { countDescendants, createNode, ensureDailyNote, getFlag, getTreeNodes, setFlag, renameNode, trashNode, useTree } from './store/tree'
+import { countDescendants, createNode, ensureDailyNote, getFlag, getTreeNodes, markLegacyDemo, setFlag, renameNode, trashNode, useTree } from './store/tree'
 import type { NodeType, NoteKind, TreeNode } from './store/tree'
 import { usePersistentState } from './store/usePersistentState'
 
@@ -280,6 +280,7 @@ export default function App() {
 
   // Première ouverture : on crée une fois le dossier de démonstration.
   useEffect(() => {
+    if (ready) markLegacyDemo()
     if (!ready || getFlag('demoCreated')) return
     setFlag('demoCreated')
     void createDemo().then((id) => {

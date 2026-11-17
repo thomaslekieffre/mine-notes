@@ -1,6 +1,8 @@
 import { getNoteDoc } from './notes'
 import { putMedia } from './media'
-import { addBlockType, createNode, getBlockTypes } from './tree'
+import { addBlockType, createNode, getBlockTypes, markDemo, trashDemos } from './tree'
+import { inDays } from './dates'
+import { MOD } from './platform'
 
 // Dossier de démonstration : une note qui utilise toutes les fonctionnalités de Mine,
 // une todo qui renvoie vers une page détaillée, et la page détaillée elle-même.
@@ -13,9 +15,9 @@ const style = (attrs: Record<string, string>) => mark('textStyle', attrs)
 const p = (...inline: Json[]): Json => ({ type: 'paragraph', ...(inline.length ? { content: inline } : {}) })
 const h = (level: number, t: string): Json => ({ type: 'heading', attrs: { level }, content: [text(t)] })
 const li = (...inline: Json[]): Json => ({ type: 'listItem', content: [p(...inline)] })
-const task = (checked: boolean, inline: Json[], sub?: Json[]): Json => ({
+const task = (checked: boolean, inline: Json[], sub?: Json[], extra: Record<string, unknown> = {}): Json => ({
   type: 'taskItem',
-  attrs: { checked },
+  attrs: { checked, ...extra },
   content: [p(...inline), ...(sub ? [{ type: 'taskList', content: sub }] : [])],
 })
 const callout = (kind: string, label: string, color: string, ...content: Json[]): Json => ({
@@ -99,7 +101,9 @@ export async function createDemo(): Promise<string> {
   if (!types.some((t) => t.label === 'Théorème')) addBlockType('Théorème', 'purple')
   if (!types.some((t) => t.label === 'Astuce')) addBlockType('Astuce', 'emerald')
 
+  trashDemos() // l'ancienne démo part à la corbeille : on la remplace
   const folder = createNode(null, 'folder', 'Démo Mine')
+  markDemo(folder)
   const main = createNode(folder, 'note', 'Démo : toutes les fonctionnalités')
   const todo = createNode(folder, 'note', 'Démo : une todo', 'todo')
   const detail = createNode(folder, 'note', 'Feature A (page détaillée)')
@@ -209,9 +213,9 @@ export async function createDemo(): Promise<string> {
       type: 'table',
       content: [
         row(true, 'Fonctionnalité', 'Raccourci', 'Où ?'),
-        row(false, 'Chercher une note', '⌘P', 'Partout'),
-        row(false, 'Chercher dans la note', '⌘F', 'Éditeur'),
-        row(false, 'Capture rapide', '⌃⌥N / ⌃⌥T', 'Depuis n’importe quelle app'),
+        row(false, 'Chercher une note', `${MOD}P`, 'Partout'),
+        row(false, 'Chercher dans la note', `${MOD}F`, 'Éditeur'),
+        row(false, 'Capture rapide', MOD === '⌘' ? '⌃⌥N / ⌃⌥T' : 'Alt+Maj+N / T', 'Depuis n’importe quelle app'),
       ],
     },
 
@@ -233,14 +237,67 @@ export async function createDemo(): Promise<string> {
     h(2, '10. Liens entre notes'),
     p(text('Tape '), text('[[', mark('code')), text(' pour lier une page. Par exemple : '), link(detail, 'Feature A (page détaillée)'), text(' ou la todo '), link(todo, 'Démo : une todo'), text('. Chaque note affiche en bas celles qui la mentionnent.')),
 
-    h(2, '11. Et aussi, dans l’app'),
+    h(2, '11. Tâches : échéances et répétitions'),
+    p(text('Passe la souris sur une tâche : une pastille « + date » apparaît à droite. Clique dessus pour choisir une date, ou une répétition (chaque jour, semaine, mois). Une tâche répétée ne reste pas cochée : elle se repousse toute seule.')),
+    {
+      type: 'taskList',
+      content: [
+        task(false, [text('Rendre le devoir')], undefined, { due: inDays(2) }),
+        task(false, [text('Une tâche en retard')], undefined, { due: inDays(-2) }),
+        task(false, [text('Faire du sport')], undefined, { due: inDays(1), repeat: 'weekly' }),
+        task(false, [text('Revoir les cours')], undefined, { due: inDays(0), repeat: 'daily' }),
+      ],
+    },
+    p(text('Ces tâches de démonstration ne comptent pas dans « Toutes les todo », le tableau de bord ni les rappels.', style({ color: 'var(--c-graphite)' }))),
+
+    h(2, '12. Étiquettes et recherche'),
+    p(text('Écris '), text('#exemple', mark('code')), text(' ou '), text('#cours', mark('code')), text(' n’importe où : le mot se colore. Voici un #exemple et un #cours. Ctrl/⌘ + clic sur une étiquette lance la recherche.')),
+    p(text('Dans la recherche ('), text(`${MOD}P`, mark('code')), text(') : '), text('#cours', mark('code')), text(' filtre par étiquette, '), text('type:todo', mark('code')), text(' par genre de note, '), text('projet:licence', mark('code')), text(' par projet. Tab complète l’étiquette proposée.')),
+
+    h(2, '13. Blocs de page : sommaire, note intégrée, Kanban'),
+    p(text('Un sommaire toujours à jour, avec '), text('/sommaire', mark('code')), text(' :')),
+    { type: 'toc' },
+    p(text('Le contenu d’une autre note, en direct (lecture seule), avec '), text('/note intégrée', mark('code')), text(' :')),
+    { type: 'embed', attrs: { id: detail } },
+    p(text('Un tableau Kanban, avec '), text('/kanban', mark('code')), text(' : glisse les cartes d’une colonne à l’autre.')),
+    {
+      type: 'kanban',
+      attrs: {
+        data: JSON.stringify({
+          columns: [
+            { id: 'k1', title: 'À faire', cards: [{ id: 'c1', text: 'Écrire le résumé' }, { id: 'c2', text: 'Réviser le chapitre 3' }] },
+            { id: 'k2', title: 'En cours', cards: [{ id: 'c3', text: 'Exposé d’histoire' }] },
+            { id: 'k3', title: 'Fait', cards: [{ id: 'c4', text: 'Installer Mine' }] },
+          ],
+        }),
+      },
+    },
+
+    h(2, '14. Tableaux : formules et tri'),
+    p(text('Dans une cellule, tape '), text('=SOMME(B)', mark('code')), text(' (ou MOYENNE, MIN, MAX, NB) : le résultat s’affiche à côté. Dans la barre du tableau : « Trier ↑/↓ » et « Σ Total ».')),
+    {
+      type: 'table',
+      content: [
+        row(true, 'Matière', 'Note', 'Coef.'),
+        row(false, 'Maths', '14', '3'),
+        row(false, 'Français', '12', '2'),
+        row(false, 'Anglais', '16', '2'),
+        row(false, 'Moyenne', '=MOYENNE(B)', '=SOMME(C)'),
+      ],
+    },
+
+    h(2, '15. Et aussi, dans l’app'),
     { type: 'bulletList', content: [
       li(text('Projets', mark('bold')), text(' avec leur propre Todo, Idées et Journal.')),
+      li(text('Favoris', mark('bold')), text(' : clic droit sur une note ou un dossier, « Épingler dans les favoris ».')),
+      li(text('Calendrier', mark('bold')), text(' : les notes du jour et les échéances sur le mois, un clic sur un jour ouvre sa note.')),
+      li(text('Rappel quotidien', mark('bold')), text(' : une notification avec les tâches du jour (Réglages › Rappels).')),
+      li(text('Dictée vocale', mark('bold')), text(' : le bouton micro de la barre d’outils ; dis « virgule », « point », « à la ligne ».')),
       li(text('Toutes les todo', mark('bold')), text(' : une vue qui regroupe les cases de toutes les notes.')),
       li(text('Note du jour', mark('bold')), text(' : un clic crée la note datée d’aujourd’hui.')),
       li(text('Capture rapide', mark('bold')), text(' : ⌃⌥N pour une note, ⌃⌥T pour une tâche, depuis n’importe quelle app.')),
       li(text('Corbeille', mark('bold')), text(' : rien n’est perdu, tu peux tout restaurer.')),
-      li(text('Plan', mark('bold')), text(' de la note, '), text('recherche', mark('bold')), text(' et '), text('remplacement', mark('bold')), text(' (⌘F).')),
+      li(text('Plan', mark('bold')), text(' de la note, '), text('recherche', mark('bold')), text(' et '), text('remplacement', mark('bold')), text(` (${MOD}F).`)),
       li(text('Sauvegarde', mark('bold')), text(' complète, export Markdown et dossier miroir sur le Mac.')),
       li(text('Réglages', mark('bold')), text(' : thème, police, taille, largeur, mascotte animée, raccourcis modifiables.')),
     ] },

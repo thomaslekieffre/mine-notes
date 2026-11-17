@@ -28,6 +28,8 @@ export interface TreeNode {
   day?: string
   /** Dossier qui range les notes du jour. */
   daily?: boolean
+  /** Dossier de démonstration : ses tâches et ses notes ne comptent ni dans les todo, ni dans les stats, ni dans les rappels. */
+  demo?: boolean
 }
 
 interface TreeState {
@@ -433,6 +435,32 @@ export function setNodeIcon(id: string, icon: string | null, color: string | nul
   })
 }
 
+
+/** Vrai si l'élément est (ou se trouve dans) le dossier de démonstration. */
+export function inDemo(node: TreeNode, byId: Map<string, TreeNode>): boolean {
+  for (let n: TreeNode | undefined = node; n; n = n.parentId ? byId.get(n.parentId) : undefined) if (n.demo) return true
+  return false
+}
+
+export function markDemo(id: string) {
+  yNodes.get(id)?.set('demo', true)
+}
+
+/** Les dossiers « Démo Mine » créés avant ce réglage reçoivent la marque (une fois). */
+export function markLegacyDemo() {
+  doc.transact(() => {
+    for (const m of yNodes.values()) {
+      if (m.get('type') === 'folder' && m.get('name') === 'Démo Mine' && !m.get('demo')) m.set('demo', true)
+    }
+  })
+}
+
+/** Met à la corbeille les démos déjà présentes (pour les remplacer par la nouvelle). */
+export function trashDemos() {
+  for (const m of [...yNodes.values()]) {
+    if (m.get('demo') && !m.get('trashedAt')) trashNode(String(m.get('id')))
+  }
+}
 
 /** Épingle ou retire un élément des favoris. */
 export function setPinned(id: string, pinned: boolean) {

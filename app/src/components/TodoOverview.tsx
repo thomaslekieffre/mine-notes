@@ -4,6 +4,7 @@ import { DueChip } from './DueChip'
 import { byDue, dueState } from '../store/dates'
 import { tasksOf, watchTasks } from '../store/todos'
 import type { TodoItem } from '../store/todos'
+import { inDemo } from '../store/tree'
 import type { TreeNode } from '../store/tree'
 
 interface Props {
@@ -39,7 +40,7 @@ export function TodoOverview({ nodes, onOpen }: Props) {
     const refresh = () => {
       if (!alive) return
       const next = nodes
-        .filter((n) => n.type === 'note')
+        .filter((n) => n.type === 'note' && !inDemo(n, byId))
         .map((node) => ({ node, path: pathOf(node), tasks: tasksOf(node.id) }))
         .filter((g) => g.tasks.length > 0)
       setGroups(next)

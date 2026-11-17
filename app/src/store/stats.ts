@@ -2,6 +2,7 @@ import { plainText } from './search'
 import { getNoteDoc } from './notes'
 import { tasksOf } from './todos'
 import type { TodoItem } from './todos'
+import { inDemo } from './tree'
 import type { NoteKind, TreeNode } from './tree'
 
 export interface ProjectStat {
@@ -29,6 +30,8 @@ const wordsOf = (text: string) => text.split(/\s+/).filter(Boolean).length
 
 /** Chiffres du tableau de bord : on lit chaque note une fois (texte et cases à cocher). */
 export async function computeStats(nodes: TreeNode[]): Promise<Stats> {
+  const all = new Map(nodes.map((n) => [n.id, n]))
+  nodes = nodes.filter((n) => !inDemo(n, all))
   const byId = new Map(nodes.map((n) => [n.id, n]))
   const projectOf = (n: TreeNode): TreeNode | null => {
     for (let p = n.parentId ? byId.get(n.parentId) : undefined; p; p = p.parentId ? byId.get(p.parentId) : undefined) {

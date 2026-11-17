@@ -219,7 +219,7 @@ export function SettingsDialog({ theme, onTheme, onOpenData, onDemo, onClose }: 
           <div className="set-row">
             <span>
               Note de démonstration
-              <small>Crée un dossier « Démo Mine » qui utilise toutes les fonctionnalités.</small>
+              <small>Recrée le dossier « Démo Mine » avec toutes les fonctionnalités (l'ancien part à la corbeille). Ses tâches ne comptent pas dans tes todo.</small>
             </span>
             <button type="button" className="btn" onClick={onDemo}>
               Créer
