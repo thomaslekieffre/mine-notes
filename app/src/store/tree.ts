@@ -16,6 +16,8 @@ export interface TreeNode {
   order: number
   /** Présent quand l'élément a été mis à la corbeille (date en ms). Ses enfants le suivent. */
   trashedAt?: number
+  /** Dernière modification du contenu (ms). */
+  updatedAt?: number
   /** Icône choisie : nom d'une icône de la liste, ou un emoji. */
   icon?: string
   /** Couleur de l'icône (nom de la palette des blocs). */
@@ -427,4 +429,14 @@ export function setNodeIcon(id: string, icon: string | null, color: string | nul
     if (icon && color) m.set('iconColor', color)
     else m.delete('iconColor')
   })
+}
+
+
+const touched = new Map<string, number>()
+/** Note la date de dernière modification d'une note (au plus une écriture toutes les 20 s par note). */
+export function touchNode(id: string) {
+  const now = Date.now()
+  if (now - (touched.get(id) ?? 0) < 20_000) return
+  touched.set(id, now)
+  yNodes.get(id)?.set('updatedAt', now)
 }

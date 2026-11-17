@@ -5,6 +5,7 @@ import { useSyncExternalStore } from 'react'
 export type ShortcutId =
   | 'palette'
   | 'newNote'
+  | 'home'
   | 'closeTab'
   | 'toggleSidebar'
   | 'settings'
@@ -31,6 +32,7 @@ export interface ShortcutDef {
 export const SHORTCUTS: ShortcutDef[] = [
   { id: 'palette', label: 'Aller à une note', hint: 'Cherche aussi dans le texte', group: 'Navigation', default: 'Command+P' },
   { id: 'newNote', label: 'Nouvelle note', group: 'Navigation', default: 'Command+N' },
+  { id: 'home', label: 'Accueil', hint: 'Tableau de bord : tâches, notes récentes, statistiques', group: 'Navigation', default: 'Command+Shift+D' },
   { id: 'closeTab', label: "Fermer l'onglet", group: 'Navigation', default: 'Command+W' },
   { id: 'toggleSidebar', label: 'Afficher / masquer la barre latérale', group: 'Navigation', default: 'Command+B' },
   { id: 'settings', label: 'Réglages', group: 'Navigation', default: 'Command+,' },

@@ -25,6 +25,8 @@ interface Props {
   onOpenPalette: () => void
   onOpenTodos: () => void
   onOpenToday: () => void
+  onOpenHome: () => void
+  homeActive: boolean
   onOpenSettings: () => void
   onChangeIcon: (n: TreeNode) => void
   trashCount: number
@@ -265,6 +267,11 @@ export function Sidebar(props: Props) {
         <kbd>{pretty(keys.palette)}</kbd>
       </button>
 
+      <button type="button" className={props.homeActive ? 'row overview selected' : 'row overview'} style={{ margin: '0 6px 2px', paddingLeft: 8 }} onClick={props.onOpenHome} title={`Accueil (${pretty(keys.home)})`}>
+        <span className="chev-space" />
+        <Icon name="home" style={{ color: 'var(--accent)', flexShrink: 0 }} />
+        <span className="row-name">Accueil</span>
+      </button>
       <button type="button" className="row overview" style={{ margin: '0 6px 2px', paddingLeft: 8 }} onClick={props.onOpenToday} title="Note du jour (⌘D)">
         <span className="chev-space" />
         <Icon name="calendar" style={{ color: 'var(--ex)', flexShrink: 0 }} />

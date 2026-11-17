@@ -4,6 +4,7 @@ import { Tabs } from './components/Tabs'
 import { NoteEditor } from './components/NoteEditor'
 import { Palette } from './components/Palette'
 import { TodoOverview } from './components/TodoOverview'
+import { Dashboard } from './components/Dashboard'
 import { DataDialog } from './components/DataDialog'
 import { StatusBar } from './components/StatusBar'
 import { SettingsDialog } from './components/SettingsDialog'
@@ -17,9 +18,8 @@ import { toggleReading } from './store/reading'
 import { SIDEBAR_NARROW, setSidebarCollapsed, toggleSidebar, useLayout } from './store/layout'
 import { createDemo } from './store/demo'
 import type { QuickMode } from './components/QuickCapture'
-import { matches, pretty, toGlobalAccel, useShortcuts } from './store/shortcuts'
+import { matches, toGlobalAccel, useShortcuts } from './store/shortcuts'
 import { isTauri } from './store/platform'
-import { Mascot } from './components/Mascot'
 import { countDescendants, createNode, ensureDailyNote, getFlag, getTreeNodes, setFlag, renameNode, trashNode, useTree } from './store/tree'
 import type { NodeType, NoteKind, TreeNode } from './store/tree'
 import { usePersistentState } from './store/usePersistentState'
@@ -28,6 +28,9 @@ export type Theme = 'system' | 'light' | 'dark'
 
 /** Onglet spécial : la vue qui regroupe toutes les todo. */
 const TODO_VIEW = '__todos__'
+/** Onglet spécial : l'écran d'accueil (tableau de bord). */
+const HOME_VIEW = '__home__'
+const HOME_TAB: TreeNode = { id: HOME_VIEW, parentId: null, type: 'note', kind: 'note', name: 'Accueil', order: 0, icon: 'home' }
 const TODO_TAB: TreeNode = {
   id: TODO_VIEW,
   parentId: null,
@@ -87,7 +90,7 @@ export default function App() {
   // Retire des onglets les notes supprimées (ou introuvables).
   useEffect(() => {
     if (!ready) return
-    const alive = (id: string) => id === TODO_VIEW || byId.get(id)?.type === 'note'
+    const alive = (id: string) => id === TODO_VIEW || id === HOME_VIEW || byId.get(id)?.type === 'note'
     const missing = ui.openTabs.filter((id) => !alive(id))
     if (missing.length === 0 && (!ui.activeId || alive(ui.activeId))) return
     setUi((u) => {
@@ -98,9 +101,10 @@ export default function App() {
   }, [ready, byId, ui.openTabs, ui.activeId, setUi])
 
   const tabs = ui.openTabs
-    .map((id) => (id === TODO_VIEW ? TODO_TAB : byId.get(id)))
+    .map((id) => (id === TODO_VIEW ? TODO_TAB : id === HOME_VIEW ? HOME_TAB : byId.get(id)))
     .filter((n): n is TreeNode => !!n && n.type === 'note')
   const showTodos = ui.activeId === TODO_VIEW
+  const showHome = ui.activeId === HOME_VIEW
   const active = ui.activeId ? byId.get(ui.activeId) : undefined
   const activeNote = active?.type === 'note' ? active : undefined
 
@@ -222,6 +226,9 @@ export default function App() {
       } else if (matches('closeTab', e) && ui.activeId) {
         e.preventDefault()
         closeTab(ui.activeId)
+      } else if (matches('home', e)) {
+        e.preventDefault()
+        openNote(HOME_VIEW)
       } else if (matches('toggleSidebar', e)) {
         e.preventDefault()
         toggleSidebar()
@@ -344,6 +351,8 @@ export default function App() {
         onDelete={setToDelete}
         onOpenPalette={() => setPaletteOpen(true)}
         onOpenTodos={() => openNote(TODO_VIEW)}
+        onOpenHome={() => openNote(HOME_VIEW)}
+        homeActive={showHome || (!ui.activeId && ready)}
         onOpenToday={openToday}
         todosActive={showTodos}
       />
@@ -362,19 +371,31 @@ export default function App() {
         />
         {!ready ? (
           <div className="doc-loading" />
+        ) : showHome ? (
+          <Dashboard
+            nodes={nodes}
+            onOpen={openNote}
+            onOpenTodos={() => openNote(TODO_VIEW)}
+            onToday={openToday}
+            onNewNote={() => create('note')}
+            onQuickTodo={() => setQuick({ mode: 'todo', fromOutside: false })}
+            onSearch={() => setPaletteOpen(true)}
+          />
         ) : showTodos ? (
           <TodoOverview nodes={nodes} onOpen={openNote} />
         ) : activeNote ? (
           <NoteEditor key={activeNote.id} node={activeNote} crumbs={crumbs} onStats={setWords} />
         ) : (
-          <div className="empty">
-            <Mascot size={110} />
-            <h2>Aucune note ouverte</h2>
-            <p>
-              <kbd>{pretty(keys.palette)}</kbd> pour chercher une note · <kbd>{pretty(keys.newNote)}</kbd> pour en créer une · clic droit dans
-              l'arborescence pour un dossier ou un projet.
-            </p>
-          </div>
+          // Rien d'ouvert : l'accueil sert d'écran de départ.
+          <Dashboard
+            nodes={nodes}
+            onOpen={openNote}
+            onOpenTodos={() => openNote(TODO_VIEW)}
+            onToday={openToday}
+            onNewNote={() => create('note')}
+            onQuickTodo={() => setQuick({ mode: 'todo', fromOutside: false })}
+            onSearch={() => setPaletteOpen(true)}
+          />
         )}
       </main>
 
