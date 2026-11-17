@@ -5,7 +5,7 @@ import type { IconName } from './Icon'
 import { Mascot } from './Mascot'
 import { pretty, useShortcuts } from '../store/shortcuts'
 import { SIDEBAR_MIN, resetSidebarWidth, setSidebarCollapsed, setSidebarWidth } from '../store/layout'
-import { moveNode, moveToRoot } from '../store/tree'
+import { moveNode, moveToRoot, setPinned } from '../store/tree'
 import type { DropPosition, NodeType, NoteKind, TreeNode } from '../store/tree'
 
 interface Props {
@@ -234,6 +234,7 @@ export function Sidebar(props: Props) {
     if (n) {
       items.push(
         { label: 'Renommer', icon: 'rename', run: () => props.onStartRename(n.id) },
+        { label: n.pinned ? 'Retirer des favoris' : 'Épingler dans les favoris', icon: 'star', run: () => setPinned(n.id, !n.pinned) },
         { label: 'Changer l\'icône…', icon: 'star', run: () => props.onChangeIcon(n) },
         { label: 'Mettre à la corbeille', icon: 'trash', run: () => props.onDelete(n), danger: true },
       )
@@ -288,6 +289,30 @@ export function Sidebar(props: Props) {
         <Icon name="check" style={{ color: 'var(--exo)', flexShrink: 0 }} />
         <span className="row-name">Toutes les todo</span>
       </button>
+
+      {props.nodes.some((n) => n.pinned) && (
+        <>
+          <div className="side-label">FAVORIS</div>
+          {props.nodes
+            .filter((n) => n.pinned)
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((n) => (
+              <div
+                key={n.id}
+                role="treeitem"
+                aria-selected={props.selectedId === n.id}
+                className={props.selectedId === n.id ? 'row selected' : 'row'}
+                style={{ margin: '0 6px', paddingLeft: 8 }}
+                onClick={() => props.onSelect(n)}
+                onContextMenu={(e) => rowMenu(e, n)}
+              >
+                <span className="chev-space" />
+                <NodeIcon node={n} size={16} />
+                <span className="row-name">{n.name}</span>
+              </div>
+            ))}
+        </>
+      )}
 
       <div className="side-label">NOTES</div>
       <div

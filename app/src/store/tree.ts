@@ -22,6 +22,8 @@ export interface TreeNode {
   icon?: string
   /** Couleur de l'icône (nom de la palette des blocs). */
   iconColor?: string
+  /** Épinglé dans les favoris de la barre latérale. */
+  pinned?: boolean
   /** Note du jour : date locale « AAAA-MM-JJ ». */
   day?: string
   /** Dossier qui range les notes du jour. */
@@ -431,6 +433,14 @@ export function setNodeIcon(id: string, icon: string | null, color: string | nul
   })
 }
 
+
+/** Épingle ou retire un élément des favoris. */
+export function setPinned(id: string, pinned: boolean) {
+  const m = yNodes.get(id)
+  if (!m) return
+  if (pinned) m.set('pinned', true)
+  else m.delete('pinned')
+}
 
 const touched = new Map<string, number>()
 /** Note la date de dernière modification d'une note (au plus une écriture toutes les 20 s par note). */
