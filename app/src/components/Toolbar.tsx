@@ -5,6 +5,7 @@ import type { IconName } from './Icon'
 import { pickImages } from '../extensions/ImageBlock'
 import { pretty, useShortcuts } from '../store/shortcuts'
 import { MOD } from '../store/platform'
+import { DictateButton } from './DictateButton'
 import { addTotalRow, sortTable } from '../extensions/TableCalc'
 
 const FONTS = [
@@ -199,6 +200,7 @@ export function Toolbar({ editor, onToggleOutline, onToggleSearch, onPrint, onHi
       )}
 
       <span className="grow" />
+      <DictateButton onText={(t) => editor.chain().focus().insertContent(t.includes('\n') ? t.split('\n').map((l) => ({ type: 'paragraph', content: l ? [{ type: 'text', text: l }] : [] })) : `${t} `).run()} />
       <button type="button" className="tb-btn" title={`Rechercher dans la note (${pretty(shortcuts.findInNote)})`} aria-label="Rechercher dans la note" onMouseDown={keepFocus} onClick={onToggleSearch}>
         <Icon name="search" size={15} />
       </button>

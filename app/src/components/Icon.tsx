@@ -15,6 +15,7 @@ const PATHS = {
   chevR: 'M9 6l6 6-6 6',
   chevD: 'M6 9l6 6 6-6',
   plus: 'M12 5v14M5 12h14',
+  mic: 'M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM6 11a6 6 0 0 0 12 0M12 17v4M9 21h6',
   search: 'M17 11a6 6 0 1 1-12 0a6 6 0 0 1 12 0zM20 20l-4-4',
   x: 'M6 6l12 12M18 6L6 18',
   menu: 'M4 7h16M4 12h16M4 17h10',
