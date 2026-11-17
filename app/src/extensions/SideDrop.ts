@@ -7,7 +7,9 @@ import type { EditorView } from '@tiptap/pm/view'
 // (2 colonnes, puis 3 si on recommence). Sur le bord d'une rangée existante, une colonne s'ajoute.
 
 interface Target {
-  side: 'left' | 'right'
+  side: 'left' | 'right' | null
+  zone: number
+  rect: DOMRect
   from: number
   node: PMNode
   el: HTMLElement
@@ -49,22 +51,34 @@ function find(view: EditorView, event: { clientX: number; clientY: number }): Ta
   const r = el.getBoundingClientRect()
   const zone = Math.min(EDGE, r.width * 0.25)
   const side = event.clientX < r.left + zone ? 'left' : event.clientX > r.right - zone ? 'right' : null
-  if (!side) return null
 
   const $from = doc.resolve(from)
   const column =
     $from.parent.type.name === 'column'
       ? { pos: $from.before($from.depth), node: $from.parent, columnsCount: $from.node($from.depth - 1).childCount }
       : null
-  return { side, from, node, el, column }
+  return { side, zone, rect: r, from, node, el, column }
 }
 
-let marked: HTMLElement | null = null
+// Repères visuels : deux bandes sur les bords du bloc survolé (discrètes), celle où l'on se trouve s'allume.
+let overlay: HTMLDivElement | null = null
+function strip(side: 'left' | 'right', t: Target, active: boolean) {
+  const el = document.createElement('div')
+  el.className = `side-strip side-strip-${side}${active ? ' active' : ''}`
+  const x = side === 'left' ? t.rect.left - 10 : t.rect.right - t.zone
+  Object.assign(el.style, { left: `${x}px`, top: `${t.rect.top}px`, width: `${t.zone + 10}px`, height: `${t.rect.height}px` })
+  if (active) el.textContent = 'Colonne'
+  return el
+}
 function mark(t: Target | null) {
-  marked?.classList.remove('side-target-left', 'side-target-right')
-  document.body.classList.toggle('side-dropping', !!t)
-  marked = t ? t.el : null
-  if (t) t.el.classList.add(t.side === 'left' ? 'side-target-left' : 'side-target-right')
+  overlay?.remove()
+  overlay = null
+  document.body.classList.toggle('side-dropping', !!t?.side)
+  if (!t) return
+  overlay = document.createElement('div')
+  overlay.className = 'side-overlay'
+  overlay.append(strip('left', t, t.side === 'left'), strip('right', t, t.side === 'right'))
+  document.body.appendChild(overlay)
 }
 
 export const SideDrop = Extension.create({
@@ -99,7 +113,7 @@ export const SideDrop = Extension.create({
             if (bad) return false
 
             const t = find(view, event as DragEvent)
-            if (!t) return false
+            if (!t || !t.side) return false
             const sel = view.state.selection
             if (t.from >= sel.from && t.from < sel.to) return false // déposé sur lui-même
 
