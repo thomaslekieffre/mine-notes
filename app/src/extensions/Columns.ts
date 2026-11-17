@@ -43,7 +43,6 @@ export const Columns = Node.create({
       mergeAttributes(HTMLAttributes, {
         'data-columns': '',
         'data-count': String(node.childCount),
-        style: `grid-template-columns: repeat(${node.childCount}, minmax(0, 1fr))`,
       }),
       0,
     ]
