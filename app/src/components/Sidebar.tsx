@@ -26,6 +26,8 @@ interface Props {
   onOpenTodos: () => void
   onOpenToday: () => void
   onOpenHome: () => void
+  onOpenCalendar: () => void
+  calendarActive: boolean
   homeActive: boolean
   onOpenSettings: () => void
   onChangeIcon: (n: TreeNode) => void
@@ -277,6 +279,12 @@ export function Sidebar(props: Props) {
         <span className="chev-space" />
         <Icon name="calendar" style={{ color: 'var(--ex)', flexShrink: 0 }} />
         <span className="row-name">Note du jour</span>
+      </button>
+
+      <button type="button" className={props.calendarActive ? 'row overview selected' : 'row overview'} style={{ margin: '0 6px 2px', paddingLeft: 8 }} onClick={props.onOpenCalendar}>
+        <span className="chev-space" />
+        <Icon name="calendar" style={{ color: 'var(--accent)', flexShrink: 0 }} />
+        <span className="row-name">Calendrier</span>
       </button>
 
       <button

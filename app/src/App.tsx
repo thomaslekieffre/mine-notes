@@ -5,6 +5,7 @@ import { NoteEditor } from './components/NoteEditor'
 import { Palette } from './components/Palette'
 import { TodoOverview } from './components/TodoOverview'
 import { Dashboard } from './components/Dashboard'
+import { Calendar } from './components/Calendar'
 import { DataDialog } from './components/DataDialog'
 import { StatusBar } from './components/StatusBar'
 import { SettingsDialog } from './components/SettingsDialog'
@@ -32,6 +33,9 @@ export type Theme = 'system' | 'light' | 'dark'
 const TODO_VIEW = '__todos__'
 /** Onglet spécial : l'écran d'accueil (tableau de bord). */
 const HOME_VIEW = '__home__'
+/** Onglet spécial : le calendrier. */
+const CAL_VIEW = '__calendar__'
+const CAL_TAB: TreeNode = { id: CAL_VIEW, parentId: null, type: 'note', kind: 'note', name: 'Calendrier', order: 0, icon: 'calendar' }
 const HOME_TAB: TreeNode = { id: HOME_VIEW, parentId: null, type: 'note', kind: 'note', name: 'Accueil', order: 0, icon: 'home' }
 const TODO_TAB: TreeNode = {
   id: TODO_VIEW,
@@ -98,7 +102,7 @@ export default function App() {
   // Retire des onglets les notes supprimées (ou introuvables).
   useEffect(() => {
     if (!ready) return
-    const alive = (id: string) => id === TODO_VIEW || id === HOME_VIEW || byId.get(id)?.type === 'note'
+    const alive = (id: string) => id === TODO_VIEW || id === HOME_VIEW || id === CAL_VIEW || byId.get(id)?.type === 'note'
     const missing = ui.openTabs.filter((id) => !alive(id))
     if (missing.length === 0 && (!ui.activeId || alive(ui.activeId))) return
     setUi((u) => {
@@ -109,10 +113,11 @@ export default function App() {
   }, [ready, byId, ui.openTabs, ui.activeId, setUi])
 
   const tabs = ui.openTabs
-    .map((id) => (id === TODO_VIEW ? TODO_TAB : id === HOME_VIEW ? HOME_TAB : byId.get(id)))
+    .map((id) => (id === TODO_VIEW ? TODO_TAB : id === HOME_VIEW ? HOME_TAB : id === CAL_VIEW ? CAL_TAB : byId.get(id)))
     .filter((n): n is TreeNode => !!n && n.type === 'note')
   const showTodos = ui.activeId === TODO_VIEW
   const showHome = ui.activeId === HOME_VIEW
+  const showCal = ui.activeId === CAL_VIEW
   const active = ui.activeId ? byId.get(ui.activeId) : undefined
   const activeNote = active?.type === 'note' ? active : undefined
 
@@ -369,6 +374,8 @@ export default function App() {
         onOpenPalette={() => setPaletteOpen(true)}
         onOpenTodos={() => openNote(TODO_VIEW)}
         onOpenHome={() => openNote(HOME_VIEW)}
+        onOpenCalendar={() => openNote(CAL_VIEW)}
+        calendarActive={showCal}
         homeActive={showHome || (!ui.activeId && ready)}
         onOpenToday={openToday}
         todosActive={showTodos}
@@ -398,6 +405,8 @@ export default function App() {
             onQuickTodo={() => setQuick({ mode: 'todo', fromOutside: false })}
             onSearch={() => setPaletteOpen(true)}
           />
+        ) : showCal ? (
+          <Calendar nodes={nodes} onOpen={openNote} />
         ) : showTodos ? (
           <TodoOverview nodes={nodes} onOpen={openNote} />
         ) : activeNote ? (
