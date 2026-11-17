@@ -41,6 +41,10 @@
 <td><img src="docs/media/liens.png" alt="Liens entre notes" /><br/><sub><b>Liens</b> <code>[[note]]</code> et notes qui te mentionnent</sub></td>
 <td><img src="docs/media/reglages.png" alt="Réglages" /><br/><sub><b>Réglages</b> : thème, police, largeur, raccourcis, sauvegarde</sub></td>
 </tr>
+<tr>
+<td><img src="docs/media/accueil.jpg" alt="Accueil : tâches, notes récentes, projets" /><br/><sub><b>Accueil</b> : tâches (en retard en rouge), notes récentes, projets, statistiques</sub></td>
+<td><img src="docs/media/echeances.jpg" alt="Tâches avec échéances" /><br/><sub><b>Échéances</b> : une pastille de date au bout de chaque tâche</sub></td>
+</tr>
 </table>
 
 > Tout ce que tu vois ici vient de la **note de démonstration** livrée avec l'app (dossier « Démo Mine », créé au premier lancement ou depuis les réglages).

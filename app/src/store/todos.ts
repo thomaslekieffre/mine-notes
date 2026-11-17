@@ -34,9 +34,21 @@ const isChecked = (el: Y.XmlElement) => {
   return v === true || v === 'true'
 }
 
+/** Texte propre à la tâche : sans celui de ses sous-tâches. */
+function ownText(el: Y.XmlElement): string {
+  return el
+    .toArray()
+    .filter((c) => !(c instanceof Y.XmlElement && c.nodeName === 'taskList'))
+    .map((c) => plainText(c as Y.XmlElement))
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 function linksIn(el: Y.XmlElement | Y.XmlFragment, out: TodoLink[] = []): TodoLink[] {
   for (const child of el.toArray()) {
     if (child instanceof Y.XmlElement) {
+      if (child.nodeName === 'taskList') continue
       if (child.nodeName === 'noteLink') out.push({ id: String(child.getAttribute('id') ?? ''), label: String(child.getAttribute('label') ?? '') })
       else linksIn(child, out)
     }
@@ -51,7 +63,7 @@ export function tasksOf(noteId: string): TodoItem[] {
   walk(doc.getXmlFragment('content'), items)
   return items.map((el) => ({
     noteId,
-    text: plainText(el).replace(/\s+/g, ' ').trim(),
+    text: ownText(el),
     links: linksIn(el),
     checked: isChecked(el),
     due: isDueKey(el.getAttribute('due')) ? (el.getAttribute('due') as string) : undefined,
