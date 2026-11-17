@@ -1,4 +1,5 @@
 import { getNoteDoc } from './notes'
+import { getMediaBlob } from './media'
 import type { TreeNode } from './tree'
 
 // Export lisible : chaque note devient un fichier .md dans un dossier qui reprend l'arborescence.
@@ -96,28 +97,119 @@ function block(n: PMNode): string {
       return `<summary>${inline(n.content)}</summary>`
     case 'detailsContent':
       return blocks(n.content)
-    case 'image':
-      return '*[image]*'
-    case 'diagram':
-      return '*[schéma]*'
+    case 'image': {
+      const ext = ctx.imageExt.get(String(n.attrs?.mediaId ?? ''))
+      return ext ? `![image](${ctx.prefix}${ATTACH}/${n.attrs?.mediaId}.${ext})` : '*[image]*'
+    }
+    case 'diagram': {
+      const file = ctx.diagrams.get(String(n.attrs?.scene ?? ''))
+      return file ? `![schéma](${ctx.prefix}${ATTACH}/${file})` : '*[schéma]*'
+    }
     default:
       return n.content ? blocks(n.content) : inline([n])
   }
 }
 
-/** Contenu Markdown d'une note (sans son titre, qui sert de nom de fichier). */
-export async function noteToMarkdown(id: string): Promise<string> {
+// Pièces jointes (images, schémas) : écrites dans un dossier « attachments » à la racine de l'export.
+const ATTACH = 'attachments'
+interface Ctx {
+  prefix: string
+  imageExt: Map<string, string>
+  diagrams: Map<string, string> // scène → nom du fichier .svg
+}
+let ctx: Ctx = { prefix: '', imageExt: new Map(), diagrams: new Map() }
+
+const EXT: Record<string, string> = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/gif': 'gif', 'image/webp': 'webp', 'image/svg+xml': 'svg' }
+const hash = (s: string) => {
+  let h = 5381
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0
+  return (h >>> 0).toString(36)
+}
+
+function collect(n: PMNode, images: Set<string>, scenes: Set<string>) {
+  if (n.type === 'image' && n.attrs?.mediaId) images.add(String(n.attrs.mediaId))
+  if (n.type === 'diagram' && n.attrs?.scene) scenes.add(String(n.attrs.scene))
+  n.content?.forEach((c) => collect(c, images, scenes))
+}
+
+/** Contenu d'une pièce jointe, lu seulement quand on en a besoin. */
+export type Loader = () => Promise<Uint8Array>
+
+async function sceneToSvg(scene: string): Promise<Uint8Array | null> {
+  try {
+    const { exportToSvg } = await import('@excalidraw/excalidraw')
+    const elements = JSON.parse(scene) as Parameters<typeof exportToSvg>[0]['elements']
+    const svg = await exportToSvg({ elements, appState: { exportBackground: true, viewBackgroundColor: '#ffffff' }, files: null, exportPadding: 12 })
+    return new TextEncoder().encode(new XMLSerializer().serializeToString(svg))
+  } catch {
+    return null
+  }
+}
+
+/** Markdown d'une note + ses pièces jointes (nom → contenu). `depth` = nombre de dossiers au-dessus de la note. */
+export async function noteToMarkdownFull(id: string, depth = 0): Promise<{ md: string; attachments: Map<string, Loader> }> {
   const { doc, persistence } = getNoteDoc(id)
   await persistence.whenSynced
   const { yXmlFragmentToProseMirrorRootNode } = await import('@tiptap/y-tiptap')
   const { getSchema } = await import('@tiptap/core')
   const { buildExtensions } = await import('../extensions/schema')
   const schema = getSchema(buildExtensions())
-  const root = yXmlFragmentToProseMirrorRootNode(doc.getXmlFragment('content'), schema)
-  return blocks((root.toJSON() as PMNode).content).trim() + '\n'
+  const root = (yXmlFragmentToProseMirrorRootNode(doc.getXmlFragment('content'), schema).toJSON() as PMNode)
+
+  const images = new Set<string>()
+  const scenes = new Set<string>()
+  collect(root, images, scenes)
+  const attachments = new Map<string, Loader>()
+  const next: Ctx = { prefix: '../'.repeat(depth), imageExt: new Map(), diagrams: new Map() }
+  for (const mediaId of images) {
+    const blob = await getMediaBlob(mediaId)
+    if (!blob) continue
+    const ext = EXT[blob.type] ?? 'bin'
+    next.imageExt.set(mediaId, ext)
+    attachments.set(`${mediaId}.${ext}`, async () => new Uint8Array(await blob.arrayBuffer()))
+  }
+  for (const scene of scenes) {
+    const name = `schema-${hash(scene)}.svg`
+    next.diagrams.set(scene, name)
+    attachments.set(name, async () => (await sceneToSvg(scene)) ?? new Uint8Array())
+  }
+  ctx = next
+  try {
+    return { md: blocks(root.content).trim() + '\n', attachments }
+  } finally {
+    ctx = { prefix: '', imageExt: new Map(), diagrams: new Map() }
+  }
+}
+
+/** Contenu Markdown d'une note (sans son titre, qui sert de nom de fichier ; images et schémas en simple mention). */
+export async function noteToMarkdown(id: string): Promise<string> {
+  const { md } = await noteToMarkdownFull(id)
+  return md
 }
 
 export const safe = (name: string) => name.replace(/[\\/:*?"<>|]/g, '-').replace(/\s+/g, ' ').trim() || 'Sans titre'
+
+/** Notes en Markdown + pièces jointes (images, schémas SVG) de toute l'arborescence. Les chemins sont relatifs à la racine de l'export. */
+export async function exportMarkdownFull(nodes: TreeNode[]): Promise<{ texts: Map<string, string>; binaries: Map<string, Loader> }> {
+  const byId = new Map(nodes.map((n) => [n.id, n]))
+  const texts = new Map<string, string>()
+  const binaries = new Map<string, Loader>()
+  for (const n of nodes) {
+    if (n.type !== 'note') continue
+    const parts: string[] = []
+    let p = n.parentId ? byId.get(n.parentId) : undefined
+    while (p) {
+      parts.unshift(safe(p.name))
+      p = p.parentId ? byId.get(p.parentId) : undefined
+    }
+    let path = [...parts, `${safe(n.name)}.md`].join('/')
+    for (let i = 2; texts.has(path); i++) path = [...parts, `${safe(n.name)} (${i}).md`].join('/')
+    const { md, attachments } = await noteToMarkdownFull(n.id, parts.length)
+    texts.set(path, `# ${n.name}\n\n${md}`)
+    for (const [name, load] of attachments) binaries.set(`${ATTACH}/${name}`, load)
+  }
+  return { texts, binaries }
+}
 
 /** Fichiers .md de toute l'arborescence : chemin relatif → contenu. */
 export async function exportMarkdown(nodes: TreeNode[]): Promise<Map<string, string>> {

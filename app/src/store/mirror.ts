@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { exportMarkdown, safe } from './markdown'
+import { exportMarkdownFull, safe } from './markdown'
 import { isTauri } from './platform'
 import type { TreeNode } from './tree'
 
@@ -30,9 +30,11 @@ export function setMirrorPath(path: string | null) {
   write(PATH_KEY, path)
   write(FILES_KEY, null)
   last.clear()
+  lastBinaries.clear()
 }
 
 const last = new Map<string, string>() // contenu déjà écrit pendant cette session
+const lastBinaries = new Set<string>() // pièces jointes déjà écrites pendant cette session
 const join = (base: string, rel: string) => `${base.replace(/\/+$/, '')}/${rel}`
 
 function dirsOf(nodes: TreeNode[]): string[] {
@@ -60,9 +62,9 @@ export interface MirrorResult {
 export async function syncMirror(nodes: TreeNode[]): Promise<MirrorResult> {
   const base = getMirrorPath()
   if (!base || !isTauri()) return { written: 0, removed: 0 }
-  const { mkdir, writeTextFile, remove } = await import('@tauri-apps/plugin-fs')
+  const { mkdir, writeTextFile, writeFile, remove } = await import('@tauri-apps/plugin-fs')
 
-  const files = await exportMarkdown(nodes)
+  const { texts: files, binaries } = await exportMarkdownFull(nodes)
   const dirs = dirsOf(nodes)
   const previous: { files: string[]; dirs: string[] } = JSON.parse(read(FILES_KEY) ?? '{"files":[],"dirs":[]}')
 
@@ -77,9 +79,19 @@ export async function syncMirror(nodes: TreeNode[]): Promise<MirrorResult> {
     written++
   }
 
+  // Images et schémas : leur nom contient une empreinte du contenu, on ne les réécrit donc jamais.
+  for (const [rel, load] of binaries) {
+    if (lastBinaries.has(rel)) continue
+    const bytes = await load()
+    await mkdir(join(base, rel.split('/').slice(0, -1).join('/')), { recursive: true })
+    await writeFile(join(base, rel), bytes)
+    lastBinaries.add(rel)
+    written++
+  }
+
   let removed = 0
   for (const rel of previous.files) {
-    if (files.has(rel)) continue
+    if (files.has(rel) || binaries.has(rel)) continue
     try {
       await remove(join(base, rel))
       removed++
@@ -89,7 +101,7 @@ export async function syncMirror(nodes: TreeNode[]): Promise<MirrorResult> {
     last.delete(rel)
   }
   // Dossiers d'avant qui n'existent plus : on ne retire que ceux qui sont vides.
-  const keep = new Set([...dirs, ...[...files.keys()].flatMap((f) => f.split('/').slice(0, -1).map((_, i, a) => a.slice(0, i + 1).join('/')))])
+  const keep = new Set([...dirs, ...[...files.keys(), ...binaries.keys()].flatMap((f) => f.split('/').slice(0, -1).map((_, i, a) => a.slice(0, i + 1).join('/')))])
   for (const d of previous.dirs.sort((a, b) => b.length - a.length)) {
     if (keep.has(d)) continue
     try {
@@ -98,7 +110,7 @@ export async function syncMirror(nodes: TreeNode[]): Promise<MirrorResult> {
       /* pas vide ou déjà parti : on le laisse */
     }
   }
-  write(FILES_KEY, JSON.stringify({ files: [...files.keys()], dirs: [...keep] }))
+  write(FILES_KEY, JSON.stringify({ files: [...files.keys(), ...binaries.keys()], dirs: [...keep] }))
   return { written, removed }
 }
 

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { getMirrorPath, setMirrorPath, syncMirror } from '../store/mirror'
 import { Icon } from './Icon'
 import { createBackup, restoreBackup } from '../store/backup'
-import { exportMarkdown } from '../store/markdown'
+import { exportMarkdownFull } from '../store/markdown'
 import { isTauri } from '../store/platform'
 import type { TreeNode } from '../store/tree'
 
@@ -73,9 +73,12 @@ export function DataDialog({ nodes, onClose }: { nodes: TreeNode[]; onClose: () 
   const exportMd = async () => {
     setBusy(true)
     try {
-      const files = await exportMarkdown(nodes)
+      const { texts: files, binaries } = await exportMarkdownFull(nodes)
       const { zipSync, strToU8 } = await import('fflate')
-      const zip = zipSync(Object.fromEntries([...files].map(([path, text]) => [path, strToU8(text)])))
+      const zip = zipSync({
+        ...Object.fromEntries([...files].map(([path, text]) => [path, strToU8(text)])),
+        ...Object.fromEntries(await Promise.all([...binaries].map(async ([path, load]) => [path, await load()] as const))),
+      })
       const name = `mine-markdown-${new Date().toISOString().slice(0, 10)}.zip`
       if (isTauri()) {
         const { save } = await import('@tauri-apps/plugin-dialog')
@@ -90,7 +93,7 @@ export function DataDialog({ nodes, onClose }: { nodes: TreeNode[]; onClose: () 
         a.click()
         setTimeout(() => URL.revokeObjectURL(a.href), 1000)
       }
-      setMsg({ ok: true, text: `${files.size} notes exportées en Markdown (images et schémas : simple mention).` })
+      setMsg({ ok: true, text: `${files.size} notes exportées en Markdown, avec ${binaries.size} pièce${binaries.size > 1 ? 's' : ''} jointe${binaries.size > 1 ? 's' : ''} (images et schémas).` })
     } catch (e) {
       setMsg({ ok: false, text: `Échec de l'export : ${(e as Error).message}` })
     } finally {
