@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Icon } from './Icon'
+import { DueChip } from './DueChip'
+import { byDue, dueState } from '../store/dates'
 import { tasksOf, watchTasks } from '../store/todos'
 import type { TodoItem } from '../store/todos'
 import type { TreeNode } from '../store/tree'
@@ -55,6 +57,7 @@ export function TodoOverview({ nodes, onOpen }: Props) {
   }, [nodes, byId])
 
   const total = groups.reduce((n, g) => n + g.tasks.length, 0)
+  const late = groups.reduce((n, g) => n + g.tasks.filter((t) => !t.checked && t.due && dueState(t.due) === 'overdue').length, 0)
   const done = groups.reduce((n, g) => n + g.tasks.filter((t) => t.checked).length, 0)
 
   return (
@@ -65,6 +68,7 @@ export function TodoOverview({ nodes, onOpen }: Props) {
         <div className="todo-meta">
           <span>
             {done} faite{done > 1 ? 's' : ''} sur {total}
+            {late > 0 && <b className="late-count"> · {late} en retard</b>}
           </span>
           <label className="todo-filter">
             <input type="checkbox" checked={hideDone} onChange={(e) => setHideDone(e.target.checked)} />
@@ -80,7 +84,8 @@ export function TodoOverview({ nodes, onOpen }: Props) {
         )}
 
         {groups.map((g) => {
-          const tasks = hideDone ? g.tasks.filter((t) => !t.checked) : g.tasks
+          const visible = hideDone ? g.tasks.filter((t) => !t.checked) : g.tasks
+          const tasks = [...visible].sort((a, b) => Number(a.checked) - Number(b.checked) || byDue(a.due, b.due))
           if (tasks.length === 0) return null
           return (
             <section key={g.node.id} className="todo-group">
@@ -93,6 +98,7 @@ export function TodoOverview({ nodes, onOpen }: Props) {
                 <label key={`${g.node.id}-${i}`} className={t.checked ? 'todo-row done' : 'todo-row'}>
                   <input type="checkbox" checked={t.checked} onChange={() => t.toggle()} />
                   <span>{t.text || '(vide)'}</span>
+                  {!t.checked && <DueChip due={t.due} />}
                   {t.links.map((l, k) => {
                     const target = byId.get(l.id)
                     return (

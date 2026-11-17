@@ -1,6 +1,7 @@
 import * as Y from 'yjs'
 import { plainText } from './search'
 import { getNoteDoc } from './notes'
+import { isDueKey } from './dates'
 import type { TreeNode } from './tree'
 
 export interface TodoLink {
@@ -14,6 +15,8 @@ export interface TodoItem {
   /** Pages liées dans la tâche ([[…]]). */
   links: TodoLink[]
   checked: boolean
+  /** Échéance « AAAA-MM-JJ », si elle existe. */
+  due?: string
   toggle: () => void
 }
 
@@ -51,6 +54,7 @@ export function tasksOf(noteId: string): TodoItem[] {
     text: plainText(el).replace(/\s+/g, ' ').trim(),
     links: linksIn(el),
     checked: isChecked(el),
+    due: isDueKey(el.getAttribute('due')) ? (el.getAttribute('due') as string) : undefined,
     // TipTap enregistre `checked` comme un booléen, que les types de Yjs ne prévoient pas.
     toggle: () => (el as unknown as { setAttribute: (k: string, v: boolean) => void }).setAttribute('checked', !isChecked(el)),
   }))

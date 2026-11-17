@@ -28,10 +28,11 @@ export async function appendText(noteId: string, text: string) {
 }
 
 /** Ajoute une tâche à cocher à la fin d'une note de todo (dans la dernière liste de tâches si elle existe). */
-export async function appendTask(noteId: string, text: string) {
+export async function appendTask(noteId: string, text: string, due?: string) {
   const f = await fragmentOf(noteId)
   const item = new Y.XmlElement('taskItem')
   item.setAttribute('checked', false as unknown as string)
+  if (due) item.setAttribute('due', due)
   item.insert(0, [paragraph(text)])
   const last = f.length > 0 ? f.get(f.length - 1) : null
   if (last instanceof Y.XmlElement && last.nodeName === 'taskList') {

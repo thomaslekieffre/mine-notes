@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Icon, NodeIcon } from './Icon'
 import { Mascot } from './Mascot'
+import { DueChip } from './DueChip'
+import { byDue, dueState } from '../store/dates'
 import { computeStats } from '../store/stats'
 import type { Stats } from '../store/stats'
 import { watchTasks } from '../store/todos'
@@ -192,6 +194,8 @@ export function Dashboard({ nodes, onOpen, onOpenTodos, onToday, onNewNote, onQu
     return parts.join(' › ')
   }
 
+  const upcoming = stats ? [...stats.openTasks].sort((a, b) => byDue(a.due, b.due)) : []
+  const late = upcoming.filter((t) => t.due && dueState(t.due) === 'overdue').length
   const totalTasks = stats ? stats.tasksOpen + stats.tasksDone : 0
   const doneRate = totalTasks > 0 && stats ? Math.round((stats.tasksDone / totalTasks) * 100) : 0
   const s = streak(activity)
@@ -228,7 +232,7 @@ export function Dashboard({ nodes, onOpen, onOpenTodos, onToday, onNewNote, onQu
         </header>
 
         <section className="dash-tiles" aria-label="Chiffres clés">
-          <Tile label="Tâches à faire" value={stats ? fmt(stats.tasksOpen) : '…'} sub={stats ? `${fmt(stats.tasksDone)} faites (${doneRate} %)` : undefined} onClick={onOpenTodos} />
+          <Tile label="Tâches à faire" value={stats ? fmt(stats.tasksOpen) : '…'} sub={stats ? (late > 0 ? `${late} en retard · ${fmt(stats.tasksDone)} faites` : `${fmt(stats.tasksDone)} faites (${doneRate} %)`) : undefined} onClick={onOpenTodos} />
           <Tile label="Série d'écriture" value={`${s} jour${s > 1 ? 's' : ''}`} sub={s > 0 ? 'd’affilée' : 'écris aujourd’hui pour la lancer'} />
           <Tile label="Mots cette semaine" value={fmt(weekWords)} sub="7 derniers jours" />
           <Tile label="Notes" value={stats ? fmt(stats.notes) : '…'} sub={stats ? `${fmt(stats.words)} mots · ${stats.projects} projet${stats.projects > 1 ? 's' : ''}` : undefined} />
@@ -244,13 +248,14 @@ export function Dashboard({ nodes, onOpen, onOpenTodos, onToday, onNewNote, onQu
             </div>
             {!stats && <div className="tree-empty">Chargement…</div>}
             {stats && stats.openTasks.length === 0 && <div className="tree-empty">Rien en attente. Profites-en !</div>}
-            {stats?.openTasks.slice(0, 9).map((t, i) => (
+            {upcoming.slice(0, 9).map((t, i) => (
               <label key={`${t.note.id}-${i}`} className="todo-row">
                 <input type="checkbox" checked={t.checked} onChange={() => t.toggle()} />
                 <span className="dash-task">
                   {t.text || '(vide)'}
                   {t.project && <small>{t.project.name}</small>}
                 </span>
+                <DueChip due={t.due} />
                 {t.links.slice(0, 1).map((l, k) => {
                   const target = byId.get(l.id)
                   return (
@@ -271,9 +276,9 @@ export function Dashboard({ nodes, onOpen, onOpenTodos, onToday, onNewNote, onQu
                 })}
               </label>
             ))}
-            {stats && stats.openTasks.length > 9 && (
+            {stats && upcoming.length > 9 && (
               <button type="button" className="link-btn more" onClick={onOpenTodos}>
-                + {stats.openTasks.length - 9} autres tâches
+                + {upcoming.length - 9} autres tâches
               </button>
             )}
           </section>

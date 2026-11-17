@@ -1,7 +1,8 @@
 import StarterKit from '@tiptap/starter-kit'
 import Highlight from '@tiptap/extension-highlight'
 import { Color, FontFamily, FontSize, TextStyle } from '@tiptap/extension-text-style'
-import { TaskItem, TaskList } from '@tiptap/extension-list'
+import { TaskList } from '@tiptap/extension-list'
+import { TaskDue } from './TaskDue'
 import { Table, TableCell, TableHeader, TableRow } from '@tiptap/extension-table'
 import { ImageBlock } from './ImageBlock'
 import { Diagram } from './Diagram'
@@ -47,7 +48,7 @@ export function buildExtensions(todo = false) {
     FontSize,
     Highlight.configure({ multicolor: true }),
     TaskList,
-    TaskItem.configure({ nested: true, onReadOnlyChecked: () => true }),
+    TaskDue.configure({ nested: true, onReadOnlyChecked: () => true }),
     ImageBlock,
     Diagram,
     Table.configure({ resizable: true }),

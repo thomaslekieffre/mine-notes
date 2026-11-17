@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import { appendTask, appendText, createCapturedNote } from '../store/capture'
 import { ensureDailyNote } from '../store/tree'
+import { inDays, nextMonday } from '../store/dates'
 import type { TreeNode } from '../store/tree'
 
 export type QuickMode = 'note' | 'todo'
@@ -65,6 +66,7 @@ export function QuickCapture({ mode, nodes, onDone }: Props) {
   const [target, setTarget] = useState(mode === 'note' && targets.some((t) => t.id === saved) ? saved : targets[0]?.id ?? '')
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
+  const [due, setDue] = useState('')
   const [busy, setBusy] = useState(false)
   const first = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
   useEffect(() => {
@@ -80,7 +82,7 @@ export function QuickCapture({ mode, nodes, onDone }: Props) {
     try {
       if (mode === 'note') remember(mode, target)
       if (mode === 'todo') {
-        await appendTask(target, text.trim())
+        await appendTask(target, text.trim(), due || undefined)
         {
           const l = targets.find((t) => t.id === target)?.label ?? ''
           onDone(l.startsWith('Projet : ') ? `Tâche ajoutée au projet « ${l.slice(9)} ».` : 'Tâche ajoutée à la Todo générale.')
@@ -153,6 +155,22 @@ export function QuickCapture({ mode, nodes, onDone }: Props) {
               onChange={(e) => setText(e.target.value)}
             />
           </>
+        )}
+
+        {mode === 'todo' && (
+          <div className="quick-due">
+            <span>Échéance</span>
+            {[
+              ["Aujourd'hui", inDays(0)],
+              ['Demain', inDays(1)],
+              ['Lundi', nextMonday()],
+            ].map(([l, v]) => (
+              <button key={v} type="button" className={due === v ? 'chip on' : 'chip'} onClick={() => setDue(due === v ? '' : v)}>
+                {l}
+              </button>
+            ))}
+            <input type="date" value={due} aria-label="Date d'échéance" onChange={(e) => setDue(e.target.value)} />
+          </div>
         )}
 
         <div className="quick-foot">

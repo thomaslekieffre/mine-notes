@@ -767,3 +767,24 @@ body.resizing * { cursor: col-resize !important; }
 .stack-legend b { color: var(--text); margin-left: 2px; }
 @media (max-width: 900px) { .dash-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dash-cols { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { .dash { padding: 18px 16px 80px; } .dash-actions { margin-left: 0; } }
+
+/* Échéances des tâches */
+.due-chip { display: inline-flex; align-items: center; margin-left: 8px; padding: 0 8px; height: 20px; border-radius: 10px; border: 1px solid var(--border); background: var(--active); color: var(--text2); font: inherit; font-size: 11.5px; line-height: 1; white-space: nowrap; cursor: pointer; vertical-align: 2px; user-select: none; }
+.due-chip.static { cursor: default; flex-shrink: 0; margin-top: 3px; }
+.due-chip.empty { opacity: 0; background: none; border-style: dashed; color: var(--muted); }
+.doc ul[data-type='taskList'] li:hover .due-chip.empty, .doc ul[data-type='taskList'] li:focus-within .due-chip.empty { opacity: 0.8; }
+.due-chip.today { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); color: var(--text); }
+.due-chip.soon { color: var(--text); }
+.due-chip.overdue { background: color-mix(in srgb, var(--c-red, #e5484d) 16%, transparent); border-color: color-mix(in srgb, var(--c-red, #e5484d) 50%, transparent); color: var(--c-red, #e5484d); font-weight: 600; }
+li[data-checked='true'] .due-chip:not(.empty) { opacity: 0.5; }
+.doc.reading .due-chip.empty, .doc:not([contenteditable='true']) .due-chip.empty { display: none; }
+.due-pop { position: fixed; z-index: 60; display: flex; flex-direction: column; gap: 2px; min-width: 190px; padding: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22); }
+.due-pop button { text-align: left; background: none; border: 0; color: var(--text); font: inherit; font-size: 13.5px; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+.due-pop button:hover { background: var(--active); }
+.due-pop button.danger { color: var(--c-red, #e5484d); }
+.due-pop input[type='date'] { margin: 4px 4px 2px; font: inherit; font-size: 13px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
+.late-count { color: var(--c-red, #e5484d); font-weight: 600; }
+.quick-due { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 10px 0 2px; font-size: 13px; color: var(--muted); }
+.quick-due .chip { background: none; border: 1px solid var(--border); border-radius: 12px; padding: 2px 10px; font: inherit; font-size: 12.5px; color: var(--text2); cursor: pointer; }
+.quick-due .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.quick-due input[type='date'] { margin-left: auto; font: inherit; font-size: 12.5px; padding: 2px 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }

@@ -56,7 +56,7 @@ function block(n: PMNode): string {
         .join('\n')
     case 'taskList':
       return (n.content ?? [])
-        .map((li) => `- [${li.attrs?.checked ? 'x' : ' '}] ${indent(blocks(li.content), '  ').trimStart()}`)
+        .map((li) => `- [${li.attrs?.checked ? 'x' : ' '}] ${indent(blocks(li.content), '  ').trimStart()}${li.attrs?.due ? ` 📅 ${String(li.attrs.due)}` : ''}`)
         .join('\n')
     case 'blockquote':
       return indent(blocks(n.content), '> ').replace(/^(?! )/gm, '')
