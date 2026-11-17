@@ -49,6 +49,13 @@ export function buildSlashItems(types: BlockType[], manageTypes: () => void): Sl
       run: ({ editor, range }) => editor.chain().focus().deleteRange(range).insertColumns(3).run(),
     },
     {
+      id: 'toc',
+      label: 'Sommaire',
+      hint: 'Liste des titres de la note',
+      group: 'Mise en page',
+      run: ({ editor, range }) => editor.chain().focus().deleteRange(range).insertContent({ type: 'toc' }).run(),
+    },
+    {
       id: 'details',
       label: 'Bloc repliable',
       hint: 'Titre + contenu masquable',

@@ -16,6 +16,7 @@ import { Markdown } from '@tiptap/markdown'
 import { CodeBlock } from './CodeBlock'
 import { NoteLink } from './NoteLink'
 import { Tags } from './Tags'
+import { Toc } from './Toc'
 import { EmojiShortcodes } from './EmojiShortcodes'
 import { MarkdownPaste } from './MarkdownPaste'
 import { mathBridge } from './mathBridge'
@@ -40,6 +41,7 @@ export function buildExtensions(todo = false) {
     DetailsContent,
     NoteLink,
     Tags,
+    Toc,
     Typography.configure({ openDoubleQuote: '« ', closeDoubleQuote: ' »' }),
     EmojiShortcodes,
     Markdown,
