@@ -58,6 +58,7 @@
 - **Note du jour** (bouton de la barre latérale) : crée ou rouvre la note datée d'aujourd'hui, rangée dans « Notes du jour ».
 - **Capture rapide** : deux raccourcis (`⌃⌥N` note, `⌃⌥T` tâche, modifiables dans les réglages) ouvrent une petite fenêtre de saisie, même depuis une autre app (app Mac).
 - **Corbeille** : supprimer met à la corbeille (annulable), restauration ou suppression définitive.
+- **Historique des versions** (`⌘⇧H`, ou le bouton horloge) : des instantanés pris 30 secondes après chaque pause d'écriture (40 gardés par note) ; aperçu en lecture seule et restauration d'une version.
 - **Export PDF** (`⌘⇧E`, ou le bouton imprimante) : feuille de style d'impression qui ne garde que la note, en clair ; dans l'app Mac, « Enregistrer au format PDF » depuis la fenêtre d'impression.
 - **Icônes personnalisées** : clic droit sur une note, un dossier ou un projet, « Changer l'icône… » (42 icônes colorables ou des emoji) ; les dossiers ont une icône ouverte/fermée.
 - **Barre latérale** : redimensionnable en glissant son bord (double-clic pour la largeur d'origine, glissé jusqu'à gauche pour la replier), masquable avec `⌘B`.

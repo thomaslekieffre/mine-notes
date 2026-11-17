@@ -679,3 +679,15 @@ body.resizing * { cursor: col-resize !important; }
 .icon-cell:hover { background: var(--active); color: var(--text); }
 .icon-cell.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--text); }
 .icon-colors { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-bottom: 10px; }
+
+/* ───── Historique des versions ───── */
+.dialog.history { width: min(940px, calc(100vw - 32px)); max-width: none; }
+.history-body { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 12px; margin: 8px 0 12px; height: min(62vh, 520px); }
+.history-list { overflow-y: auto; display: flex; flex-direction: column; gap: 3px; padding-right: 4px; }
+.history-item { text-align: left; padding: 7px 9px; border-radius: 8px; border: 1px solid transparent; background: none; color: var(--text2); display: flex; flex-direction: column; font-size: 13px; cursor: pointer; }
+.history-item small { color: var(--muted); font-size: 11.5px; }
+.history-item:hover { background: var(--active); }
+.history-item.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--text); }
+.history-preview { overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; background: var(--bg); }
+.history-hint { font-size: 11.5px; color: var(--muted); align-self: center; }
+@media (max-width: 760px) { .history-body { grid-template-columns: 1fr; height: auto; } .history-list { max-height: 160px; } }

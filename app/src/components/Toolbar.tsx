@@ -56,7 +56,7 @@ function Btn({
   )
 }
 
-export function Toolbar({ editor, onToggleOutline, onToggleSearch, onPrint }: { editor: Editor; onToggleOutline: () => void; onToggleSearch: () => void; onPrint: () => void }) {
+export function Toolbar({ editor, onToggleOutline, onToggleSearch, onPrint, onHistory }: { editor: Editor; onToggleOutline: () => void; onToggleSearch: () => void; onPrint: () => void; onHistory: () => void }) {
   const shortcuts = useShortcuts()
   const s = useEditorState({
     editor,
@@ -202,6 +202,9 @@ export function Toolbar({ editor, onToggleOutline, onToggleSearch, onPrint }: { 
       </button>
       <button type="button" className="tb-btn" title="Plan de la note" aria-label="Plan de la note" onMouseDown={keepFocus} onClick={onToggleOutline}>
         <Icon name="menu" size={15} />
+      </button>
+      <button type="button" className="tb-btn" title={`Historique de la note (${pretty(shortcuts.history)})`} aria-label="Historique de la note" onMouseDown={keepFocus} onClick={onHistory}>
+        <Icon name="history" size={15} />
       </button>
       <button type="button" className="tb-btn" title={`Exporter en PDF (${pretty(shortcuts.exportPdf)})`} aria-label="Exporter en PDF" onMouseDown={keepFocus} onClick={onPrint}>
         <Icon name="printer" size={15} />

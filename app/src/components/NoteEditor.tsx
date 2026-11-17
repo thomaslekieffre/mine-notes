@@ -16,6 +16,8 @@ import type { PenSettings } from './PenLayer'
 import { ReadingBar } from './ReadingBar'
 import { useReading } from '../store/reading'
 import { printPage } from '../store/platform'
+import { HistoryDialog } from './HistoryDialog'
+import { watchHistory } from '../store/history'
 import type { Node as PMNode } from '@tiptap/pm/model'
 import type { SlashItem } from '../extensions/SlashCommand'
 import { SlashCommand } from '../extensions/SlashCommand'
@@ -50,6 +52,10 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
   const [scroller, setScroller] = useState<HTMLDivElement | null>(null)
   const [pen, setPen] = useState<PenSettings>({ on: false, color: '--c-red', tool: 'pen', fade: true })
   const [clearSignal, setClearSignal] = useState(0)
+  const [historyOpen, setHistoryOpen] = useState(false)
+
+  // Instantanés pour l'historique des versions.
+  useEffect(() => watchHistory(node.id, doc), [node.id, doc])
   const [wiki, setWiki] = useState<SlashState | null>(null)
   const [searchOpen, setSearchOpen] = useState(false)
   const [outlineOpen, setOutlineOpen] = useState(false)
@@ -151,6 +157,9 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
       } else if (matches('exportPdf', e)) {
         e.preventDefault()
         void printPage()
+      } else if (matches('history', e)) {
+        e.preventDefault()
+        setHistoryOpen(true)
       }
     }
     window.addEventListener('keydown', onKey)
@@ -188,6 +197,7 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
           onToggleOutline={() => setOutlineOpen((v) => !v)}
           onToggleSearch={() => setSearchOpen((v) => !v)}
           onPrint={() => void printPage()}
+          onHistory={() => setHistoryOpen(true)}
         />
       )}
       <div className="doc-scroll" ref={setScroller}>
@@ -226,6 +236,7 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
         <ReadingBar onPrint={() => void printPage()} pen={pen} onPen={(patch) => setPen((p) => ({ ...p, ...patch }))} onClear={() => setClearSignal((n) => n + 1)} />
       )}
       {reading && scroller && <PenLayer scroller={scroller} pen={pen} clearSignal={clearSignal} />}
+      {historyOpen && <HistoryDialog noteId={node.id} doc={doc} onClose={() => setHistoryOpen(false)} />}
       {searchOpen && editor && <SearchBar editor={editor} onClose={() => { setSearchOpen(false); editor.commands.focus() }} />}
       {outlineOpen && editor && <Outline editor={editor} onClose={() => setOutlineOpen(false)} />}
       {math && editor && (
