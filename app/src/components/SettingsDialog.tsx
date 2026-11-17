@@ -2,6 +2,7 @@ import { Icon } from './Icon'
 import { Mascot } from './Mascot'
 import { setPrefs, usePrefs } from '../store/prefs'
 import type { Prefs } from '../store/prefs'
+import { ensureNotifyPermission } from '../store/reminders'
 import { isMac, isTauri, openExternal, THIS_COMPUTER } from '../store/platform'
 import {
   SHORTCUTS,
@@ -171,6 +172,37 @@ export function SettingsDialog({ theme, onTheme, onOpenData, onDemo, onClose }: 
               options={[['on', 'Oui'], ['off', 'Non']]}
             />
           </div>
+        </section>
+
+        <section className="set-section">
+          <h4>Rappels</h4>
+          <div className="set-row">
+            <span>
+              Rappel quotidien des tâches
+              <small>Une notification avec les tâches du jour et celles en retard (l'app doit être ouverte).</small>
+            </span>
+            <Seg<'on' | 'off'>
+              label="Rappel"
+              value={p.remind ? 'on' : 'off'}
+              onPick={async (v) => {
+                if (v === 'on' && !(await ensureNotifyPermission())) return
+                setPrefs({ remind: v === 'on' })
+              }}
+              options={[['on', 'Oui'], ['off', 'Non']]}
+            />
+          </div>
+          {p.remind && (
+            <div className="set-row">
+              <span>Heure du rappel</span>
+              <select className="bt-scope" aria-label="Heure du rappel" value={p.remindHour} onChange={(e) => setPrefs({ remindHour: Number(e.target.value) })}>
+                {Array.from({ length: 24 }, (_, h) => (
+                  <option key={h} value={h}>
+                    {String(h).padStart(2, '0')}:00
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </section>
 
         <section className="set-section">

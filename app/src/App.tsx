@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Sidebar } from './components/Sidebar'
 import { Tabs } from './components/Tabs'
 import { NoteEditor } from './components/NoteEditor'
@@ -13,6 +13,7 @@ import { restoreNode } from './store/tree'
 import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
 import { OPEN_TAG_EVENT } from './extensions/Tags'
+import { startReminders } from './store/reminders'
 import { QuickCapture } from './components/QuickCapture'
 import { IconPicker } from './components/IconPicker'
 import { toggleReading } from './store/reading'
@@ -56,6 +57,11 @@ const DEFAULT_NAMES: Record<NodeType, string> = {
 
 export default function App() {
   const { ready, nodes, trash } = useTree()
+  const nodesRef = useRef(nodes)
+  useEffect(() => {
+    nodesRef.current = nodes
+  }, [nodes])
+  useEffect(() => startReminders(() => nodesRef.current), [])
   useMirror(nodes, ready)
   const [ui, setUi] = usePersistentState<UiState>('mine-ui', {
     openTabs: [],

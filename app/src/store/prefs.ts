@@ -6,9 +6,13 @@ export interface Prefs {
   size: 'S' | 'M' | 'L' | 'XL'
   width: 'narrow' | 'normal' | 'wide'
   mascot: boolean
+  /** Rappel quotidien des tâches (notification). */
+  remind: boolean
+  /** Heure du rappel (0-23). */
+  remindHour: number
 }
 
-export const DEFAULT_PREFS: Prefs = { font: 'inter', size: 'M', width: 'normal', mascot: true }
+export const DEFAULT_PREFS: Prefs = { font: 'inter', size: 'M', width: 'normal', mascot: true, remind: false, remindHour: 9 }
 
 const FONTS: Record<Prefs['font'], string> = {
   inter: "'Inter', system-ui, sans-serif",
@@ -38,6 +42,8 @@ function apply(p: Prefs) {
   root.style.setProperty('--doc-width', WIDTHS[p.width])
 }
 apply(state)
+
+export const getPrefs = () => state
 
 export function setPrefs(patch: Partial<Prefs>) {
   state = { ...state, ...patch }

@@ -42,6 +42,7 @@
     "core:window:allow-unminimize",
     "core:window:allow-is-focused",
     "core:window:allow-is-visible",
-    "opener:default"
+    "opener:default",
+    "notification:default"
   ]
 }
