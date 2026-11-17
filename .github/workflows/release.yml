@@ -45,6 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectPath: app
+          tauriScript: npx tauri
           tagName: ${{ github.ref_name }}
           releaseName: 'Mine ${{ github.ref_name }}'
           releaseBody: 'Installeurs : `.dmg` pour Mac (Apple Silicon ou Intel), `.exe` / `.msi` pour Windows. Les apps ne sont pas signées : voir le README pour la première ouverture.'
