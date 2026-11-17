@@ -1,6 +1,6 @@
 # Mine — plan de développement
 
-> Mes notes, chez moi. Statut : **version 0.2.1, utilisable au quotidien** (web + app Mac). Dépôt : [mine-notes](https://github.com/thomaslekieffre/mine-notes).
+> Mes notes, chez moi. Statut : **version 0.22.1, utilisable au quotidien** (web + app Mac ; code adapté à Windows, pas encore testé dessus). Dépôt : [mine-notes](https://github.com/thomaslekieffre/mine-notes).
 > Mascotte : un petit crayon souriant, animé dans l'app.
 
 ## 1. Vision
@@ -25,7 +25,7 @@ Une fois ouverte, elle ressemble à un IDE (arborescence, onglets, palette de co
 | Liens | Liens entre notes (`[[`), liens entrants, pages créées à la volée depuis une tâche |
 | Capture rapide | Écrire une note ou ajouter une tâche depuis n'importe quelle app du Mac |
 | Sécurité | Corbeille avec restauration, sauvegarde complète, dossier miroir sur le disque |
-| Appareils | Mac perso, Mac pro, iPhone ; pas de stylet |
+| Appareils | Mac perso, Mac pro, iPhone ; pas de stylet ; Windows possible (non testé) |
 | Données | 100 % chez soi (homelab), jamais de cloud tiers, fonctionne hors ligne |
 
 ## 3. Choix techniques
@@ -71,18 +71,33 @@ Une fois ouverte, elle ressemble à un IDE (arborescence, onglets, palette de co
 - **Blocs** : 21 couleurs + couleur libre ; types de blocs globaux ou réservés à un projet ; déplacement d'un bloc avec `Alt+↑/↓` (modifiable) ; poignée de glisser agrandie.
 - **Texte** : formules (MathLive + KaTeX), code coloré avec choix du langage, blocs repliables, liens `[[note]]` avec liens entrants, collage de Markdown, typographie française, emoji `:smile:`, temps de lecture.
 - **Navigation** : recherche et remplacement dans la note (`⌘F`), plan des titres, note du jour (dossier « Notes du jour », classé par date).
-- **Todo** : une note de todo ne contient que des cases à cocher (une note qui contient autre chose reste un document normal) ; chaque tâche peut lier une page, créée à la volée si elle n'existe pas ; les liens apparaissent dans « Toutes les todo ».
-- **Capture rapide** : raccourcis globaux (`⌃⌥N` note, `⌃⌥T` tâche) qui ouvrent une petite fenêtre depuis n'importe quelle app ; les tâches vont par défaut dans la Todo générale.
-- **Sécurité des données** : corbeille (suppression douce, annulation, restauration, suppression définitive), dossier miroir sur le Mac (notes en Markdown, copie mise à jour toutes les 10 s).
-- **Confort** : réglages (thème, police, taille, largeur, mascotte), raccourcis tous modifiables avec détection des conflits, mascotte animée (cligne, suit l'écriture, saute, dort), nouvelle icône d'app, version et nom du projet dans « À propos ».
+- **Todo** : une note de todo ne contient que des cases à cocher ; chaque tâche peut lier une page, créée à la volée si elle n'existe pas ; les liens apparaissent dans « Toutes les todo ».
+- **Capture rapide** : raccourcis globaux (`⌃⌥N` note, `⌃⌥T` tâche) qui ouvrent une petite fenêtre depuis n'importe quelle app.
+- **Sécurité des données** : corbeille, dossier miroir sur le Mac (notes en Markdown, copie toutes les 10 s).
+- **Confort** : réglages (thème, police, taille, largeur, mascotte), raccourcis modifiables avec détection des conflits, mascotte animée, nouvelle icône d'app.
 - **Projet** : dépôt public, licence MIT, README, `npm run set-version`.
+
+### Ajouts depuis (versions 0.3 → 0.11)
+
+Accueil (tableau de bord, statistiques d'écriture), historique des versions d'une note, export PDF / impression, icônes personnalisées, barre latérale redimensionnable, mode lecture avec stylo, note de démonstration, export Markdown avec pièces jointes.
+
+### Ajouts depuis (versions 0.12 → 0.22)
+
+- **Échéances et organisation** : date au bout de chaque tâche (en retard en rouge, tri par date), tâches récurrentes (jour / semaine / mois), calendrier du mois, rappel quotidien par notification, favoris dans la barre latérale.
+- **Recherche** : étiquettes `#tag` colorées, palette avec filtres `#tag`, `type:`, `projet:` et suggestions.
+- **Blocs de page** : sommaire automatique, note intégrée (lecture seule), tableau Kanban.
+- **Tableaux** : formules `=SOMME/MOYENNE/MIN/MAX/NB`, tri par colonne, ligne de total.
+- **Dictée vocale** : bouton micro (éditeur et capture rapide) via la reconnaissance vocale du système.
+- **Windows** : raccourcis et libellés selon le système, workflows GitHub Actions (`ci.yml` : vérifications ; `release.yml` : installeurs Mac + Windows sur un tag `v*`, release en brouillon). *Jamais exécutés pour l'instant.*
+- **Démo refaite** (0.22) : couvre toutes ces fonctionnalités ; son dossier est exclu des todo, des stats, du calendrier et des rappels ; elle se remplace une fois au lancement si elle date d'avant.
 
 ### Reste à faire
 
-- **Priorité proposée** : modèles de notes, cartes de révision (Question / Réponse + mode « Réviser »), export PDF / impression, mode concentration, historique des versions d'une note, release GitHub avec le `.dmg`, tests automatiques.
-- **À rediscuter** : blocs « qui changent la façon de faire » (diagrammes Mermaid, tableau Kanban, minuteur Pomodoro, étiquettes `#tag` et dates, intégrations).
+- **Release** : pousser, poser le tag `v…`, vérifier que le workflow construit bien Mac et Windows, tester l'app sous Windows.
+- **Non testé dans la fenêtre native** : notifications de rappel, dictée vocale (WKWebView / WebView2), raccourcis globaux, impression PDF, bloc Kanban et note intégrée.
+- **Idées écartées ou non faites** : diagrammes Mermaid (abandonné), minuteur Pomodoro (abandonné), graphe des liens, modèles de notes, cartes de révision, mode concentration, objectif de mots, import Markdown / Obsidian, chiffrement.
+- **Limites connues** : une tâche récurrente perd l'historique de ses cochages ; la note intégrée est en lecture seule et n'affiche pas ses propres notes intégrées ; le rappel exige que l'app soit ouverte ; fermer la fenêtre sur Mac laisse l'app vivre sans fenêtre (un clic sur le Dock ne la rouvre pas encore).
 - **Plus tard** : jalon E (synchronisation homelab + PWA iPhone).
-- **Non testé dans la fenêtre native** : raccourcis globaux, bouton GitHub, clavier visuel des formules.
 
 Code : `app/` (Vite + React + TypeScript + TipTap + Yjs + Tauri). Lancer : `cd app && npm run dev`. App Mac : `cd app && npx tauri build --bundles app`.
 
@@ -102,8 +117,9 @@ Code : `app/` (Vite + React + TypeScript + TipTap + Yjs + Tauri). Lancer : `cd a
 - ~~Colonnes~~ **Décidé** : largeurs égales (2 ou 3), pas de redimensionnement.
 - ~~Todo~~ **Décidé** : que des cases à cocher, avec liens vers des pages détaillées.
 - ~~Licence~~ **Décidé** : MIT, dépôt public.
-- **Ouvert** : format exact des modèles de notes ; sync homelab (quand l'auteur voudra).
+- ~~Mermaid et Pomodoro~~ **Écartés** (jugés inutiles).
+- **Ouvert** : sync homelab (quand l'auteur voudra) ; modèles de notes.
 
 ## 7. Prochaine étape
 
-Choisir dans « Reste à faire » : la suite proposée est modèles de notes, puis cartes de révision. Règles de travail : un commit par fonctionnalité, version à changer à chaque livraison (`npm run set-version`).
+Finir la mise en ligne : pousser, tag de la première release, vérification des installeurs (Mac et Windows). Ensuite, au choix : corriger la réouverture de la fenêtre depuis le Dock, sync homelab, ou une des idées non faites. Règles de travail : un commit par fonctionnalité, version à changer à chaque livraison (`npm run set-version`).
