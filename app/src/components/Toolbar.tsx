@@ -5,6 +5,7 @@ import type { IconName } from './Icon'
 import { pickImages } from '../extensions/ImageBlock'
 import { pretty, useShortcuts } from '../store/shortcuts'
 import { MOD } from '../store/platform'
+import { addTotalRow, sortTable } from '../extensions/TableCalc'
 
 const FONTS = [
   { label: 'Inter', value: '' },
@@ -237,6 +238,15 @@ export function Toolbar({ editor, onToggleOutline, onToggleSearch, onPrint, onHi
           </button>
           <button type="button" className="tb-text" onMouseDown={keepFocus} onClick={() => c().toggleHeaderRow().run()}>
             En-tête
+          </button>
+          <button type="button" className="tb-text" title="Trier selon la colonne du curseur" onMouseDown={keepFocus} onClick={() => sortTable(editor, 'asc')}>
+            Trier ↑
+          </button>
+          <button type="button" className="tb-text" title="Trier selon la colonne du curseur" onMouseDown={keepFocus} onClick={() => sortTable(editor, 'desc')}>
+            Trier ↓
+          </button>
+          <button type="button" className="tb-text" title="Ajoute une ligne de totaux. Tu peux aussi écrire =SOMME(B), =MOYENNE(B), =MIN, =MAX, =NB dans une cellule" onMouseDown={keepFocus} onClick={() => addTotalRow(editor)}>
+            Σ Total
           </button>
           <button type="button" className="tb-text danger" onMouseDown={keepFocus} onClick={() => c().deleteTable().run()}>
             Supprimer le tableau

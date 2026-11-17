@@ -841,3 +841,5 @@ li[data-checked='true'] .due-chip:not(.empty) { opacity: 0.5; }
 .kanban-add, .kanban-newcol { background: none; border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); font: inherit; font-size: 13px; padding: 5px 8px; cursor: pointer; }
 .kanban-add:hover, .kanban-newcol:hover { color: var(--text); border-color: var(--muted); }
 .kanban-newcol { margin-top: 8px; }
+
+.calc-result { margin-left: 10px; padding: 0 6px; border-radius: 4px; background: color-mix(in srgb, var(--c-green) 18%, transparent); color: var(--c-green); font-size: 0.9em; font-variant-numeric: tabular-nums; user-select: none; }
