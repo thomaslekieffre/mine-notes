@@ -3,6 +3,7 @@ import type { BlockType } from '../store/tree'
 import { pickImages } from './ImageBlock'
 import { colorCss } from '../store/colors'
 import { mathBridge } from './mathBridge'
+import { defaultBoard } from './Kanban'
 import { placeCursorInFirst } from './placeCursor'
 
 // Sans accents, sans espaces : « 3col » trouve « 3 colonnes ».
@@ -47,6 +48,13 @@ export function buildSlashItems(types: BlockType[], manageTypes: () => void): Sl
       hint: 'Mise en page',
       group: 'Mise en page',
       run: ({ editor, range }) => editor.chain().focus().deleteRange(range).insertColumns(3).run(),
+    },
+    {
+      id: 'kanban',
+      label: 'Tableau Kanban',
+      hint: 'Colonnes de cartes à glisser',
+      group: 'Mise en page',
+      run: ({ editor, range }) => editor.chain().focus().deleteRange(range).insertContent({ type: 'kanban', attrs: { data: JSON.stringify(defaultBoard()) } }).run(),
     },
     {
       id: 'embed',
