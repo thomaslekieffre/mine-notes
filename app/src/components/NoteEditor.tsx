@@ -171,6 +171,10 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
   }, [editor])
 
   useEffect(() => {
+    if (import.meta.env.DEV) (window as unknown as { __mineEditor?: unknown }).__mineEditor = editor
+  }, [editor])
+
+  useEffect(() => {
     editor?.setEditable(!reading)
     if (!reading) setPen((p) => ({ ...p, on: false }))
   }, [editor, reading])

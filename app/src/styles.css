@@ -301,11 +301,13 @@ kbd { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mu
 
 /* ───── Poignée de déplacement ───── */
 .drag-grip {
-  display: flex; align-items: center; justify-content: center; width: 26px; height: 34px; border-radius: 6px;
-  color: var(--muted); cursor: grab; font-size: 18px; letter-spacing: -3px; user-select: none;
+  display: flex; align-items: center; justify-content: center; width: 30px; height: 38px; border-radius: 8px;
+  color: var(--text2); background: var(--bar); border: 1px solid var(--border); cursor: grab; font-size: 20px; letter-spacing: -3px; user-select: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
 }
+.drag-grip:active { cursor: grabbing; }
 .ProseMirror-dropcursor { background: var(--accent) !important; height: 3px !important; border-radius: 2px; }
-.drag-grip:hover { background: var(--active); color: var(--text); }
+.drag-grip:hover { background: var(--active); color: var(--text); border-color: var(--accent); }
 .ProseMirror-selectednode { outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent); outline-offset: 2px; border-radius: 6px; }
 
 /* ───── Menu « / » ───── */
