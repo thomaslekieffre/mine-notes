@@ -12,6 +12,7 @@ import { TrashDialog } from './components/TrashDialog'
 import { restoreNode } from './store/tree'
 import { useMirror } from './store/mirror'
 import { OPEN_NOTE_EVENT } from './extensions/NoteLink'
+import { OPEN_TAG_EVENT } from './extensions/Tags'
 import { QuickCapture } from './components/QuickCapture'
 import { IconPicker } from './components/IconPicker'
 import { toggleReading } from './store/reading'
@@ -66,6 +67,7 @@ export default function App() {
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [pendingOpen, setPendingOpen] = useState<string | null>(null)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [paletteQuery, setPaletteQuery] = useState('')
   const [toDelete, setToDelete] = useState<TreeNode | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [words, setWords] = useState<number | null>(null)
@@ -214,6 +216,15 @@ export default function App() {
     window.addEventListener(OPEN_NOTE_EVENT, onOpen)
     return () => window.removeEventListener(OPEN_NOTE_EVENT, onOpen)
   }, [openNote])
+
+  useEffect(() => {
+    const onTag = (e: Event) => {
+      setPaletteQuery(`${(e as CustomEvent<string>).detail} `)
+      setPaletteOpen(true)
+    }
+    window.addEventListener(OPEN_TAG_EVENT, onTag)
+    return () => window.removeEventListener(OPEN_TAG_EVENT, onTag)
+  }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -424,10 +435,15 @@ export default function App() {
 
       {paletteOpen && (
         <Palette
+          key={paletteQuery}
+          initialQuery={paletteQuery}
           nodes={nodes}
           onOpen={openNote}
           onNewNote={(name) => create('note', undefined, 'note', name)}
-          onClose={() => setPaletteOpen(false)}
+          onClose={() => {
+            setPaletteOpen(false)
+            setPaletteQuery('')
+          }}
         />
       )}
 

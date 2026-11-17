@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon, NodeIcon } from './Icon'
 import { searchContent } from '../store/search'
+import { collectTags, normTag, parseQuery } from '../store/tags'
+import type { TagInfo } from '../store/tags'
+import { projectOf } from '../store/tree'
 import type { TreeNode } from '../store/tree'
 
 interface Props {
@@ -8,6 +11,8 @@ interface Props {
   onOpen: (id: string) => void
   onNewNote: (name: string) => void
   onClose: () => void
+  /** Texte de départ (par exemple « #examen » quand on clique une étiquette). */
+  initialQuery?: string
 }
 
 interface Row {
@@ -35,8 +40,9 @@ function fuzzy(q: string, s: string): boolean {
   return i === q.length
 }
 
-export function Palette({ nodes, onOpen, onNewNote, onClose }: Props) {
-  const [q, setQ] = useState('')
+export function Palette({ nodes, onOpen, onNewNote, onClose, initialQuery = '' }: Props) {
+  const [q, setQ] = useState(initialQuery)
+  const [tagList, setTagList] = useState<TagInfo[]>([])
   const [idx, setIdx] = useState(0)
   const [textHits, setTextHits] = useState<Row[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
@@ -44,10 +50,43 @@ export function Palette({ nodes, onOpen, onNewNote, onClose }: Props) {
 
   const byId = useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes])
 
+  useEffect(() => {
+    let alive = true
+    void collectTags(nodes).then((t) => alive && setTagList(t))
+    return () => {
+      alive = false
+    }
+  }, [nodes])
+
+  const parsed = useMemo(() => parseQuery(q), [q])
+  const filtered = parsed.tags.length > 0 || !!parsed.kind || !!parsed.project
+  // Notes qui portent toutes les étiquettes demandées.
+  const tagged = useMemo(() => {
+    if (parsed.tags.length === 0) return null
+    return new Set(nodes.filter((n) => n.type === 'note' && parsed.tags.every((t) => tagList.some((x) => x.key.startsWith(t) && x.notes.includes(n.id)))).map((n) => n.id))
+  }, [parsed.tags, tagList, nodes])
+  const passes = (n: TreeNode) => {
+    if (tagged && !tagged.has(n.id)) return false
+    if (parsed.kind && n.kind !== parsed.kind) return false
+    if (parsed.project) {
+      const pid = projectOf(nodes, n.id)
+      const pr = pid ? byId.get(pid) : undefined
+      if (!pr || !norm(pr.name).includes(parsed.project)) return false
+    }
+    return true
+  }
+  // Suggestions d'étiquettes pendant la frappe d'un « # ».
+  const lastTok = q.split(/\s+/).pop() ?? ''
+  const suggestions = lastTok.startsWith('#') ? tagList.filter((t) => t.key.startsWith(normTag(lastTok.slice(1))) && t.key !== normTag(lastTok.slice(1))).slice(0, 8) : []
+  const pickTag = (label: string) => {
+    setQ(q.slice(0, q.length - lastTok.length) + '#' + label + ' ')
+    inputRef.current?.focus()
+  }
+
   const nameHits = useMemo<Row[]>(() => {
-    const nq = norm(q.trim())
+    const nq = norm(parsed.text.trim())
     return nodes
-      .filter((n) => n.type === 'note')
+      .filter((n) => n.type === 'note' && passes(n))
       .map((n) => ({ n, path: pathOf(n, byId) }))
       .filter(({ n, path }) => !nq || fuzzy(nq, norm(n.name)) || norm(path).includes(nq))
       .sort((a, b) => {
@@ -56,18 +95,19 @@ export function Palette({ nodes, onOpen, onNewNote, onClose }: Props) {
         return sa - sb || a.n.name.localeCompare(b.n.name)
       })
       .slice(0, 30)
-  }, [nodes, byId, q])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodes, byId, parsed, tagged])
 
   // Recherche dans le contenu des notes (en plus des titres), avec un petit délai.
   useEffect(() => {
-    const query = q.trim()
+    const query = parsed.text.trim()
     if (query.length < 2) {
       setTextHits([])
       return
     }
     let alive = true
     const t = setTimeout(() => {
-      void searchContent(nodes, query).then((hits) => {
+      void searchContent(filtered ? nodes.filter(passes) : nodes, query).then((hits) => {
         if (alive) setTextHits(hits.map((h) => ({ n: h.node, path: pathOf(h.node, byId), snippet: h.snippet })))
       })
     }, 150)
@@ -75,7 +115,8 @@ export function Palette({ nodes, onOpen, onNewNote, onClose }: Props) {
       alive = false
       clearTimeout(t)
     }
-  }, [q, nodes, byId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parsed.text, nodes, byId, tagged])
 
   const inNames = new Set(nameHits.map((r) => r.n.id))
   const contentRows = textHits.filter((r) => !inNames.has(r.n.id))
@@ -84,7 +125,7 @@ export function Palette({ nodes, onOpen, onNewNote, onClose }: Props) {
   const choose = (i: number) => {
     const r = rows[i]
     if (r) onOpen(r.n.id)
-    else if (q.trim()) onNewNote(q.trim())
+    else if (parsed.text.trim() && !filtered) onNewNote(parsed.text.trim())
     onClose()
   }
 
@@ -116,7 +157,7 @@ export function Palette({ nodes, onOpen, onNewNote, onClose }: Props) {
           <input
             ref={inputRef}
             value={q}
-            placeholder="Aller à une note ou chercher dans le texte…"
+            placeholder="Aller à une note, chercher dans le texte, #étiquette, type:todo…"
             onChange={(e) => {
               setQ(e.target.value)
               setIdx(0)
@@ -131,15 +172,28 @@ export function Palette({ nodes, onOpen, onNewNote, onClose }: Props) {
                 e.preventDefault()
                 setIdx((i) => Math.max(i - 1, 0))
               }
+              if (e.key === 'Tab' && suggestions[0]) {
+                e.preventDefault()
+                pickTag(suggestions[0].label)
+              }
               if (e.key === 'Enter') choose(idx)
             }}
           />
         </div>
+        {(suggestions.length > 0 || (!q && tagList.length > 0)) && (
+          <div className="palette-tags">
+            {(suggestions.length > 0 ? suggestions : tagList.slice(0, 10)).map((t) => (
+              <button key={t.key} type="button" className="tag-chip" onClick={() => (suggestions.length > 0 ? pickTag(t.label) : setQ(`#${t.label} `))}>
+                #{t.label} <small>{t.notes.length}</small>
+              </button>
+            ))}
+          </div>
+        )}
         <div className="palette-list" role="listbox">
           {nameHits.map((r, i) => renderRow(r, i))}
           {contentRows.length > 0 && <div className="palette-section">Dans le texte</div>}
           {contentRows.map((r, i) => renderRow(r, nameHits.length + i))}
-          {rows.length === 0 && <div className="palette-empty">Aucune note trouvée. Entrée pour en créer une.</div>}
+          {rows.length === 0 && <div className="palette-empty">{filtered ? "Aucune note ne correspond à ces filtres." : "Aucune note trouvée. Entrée pour en créer une."}</div>}
         </div>
       </div>
     </div>
