@@ -1,7 +1,8 @@
 import * as Y from 'yjs'
 import { plainText } from './search'
 import { getNoteDoc } from './notes'
-import { isDueKey } from './dates'
+import { isDueKey, isRepeat, nextDue } from './dates'
+import type { Repeat } from './dates'
 import type { TreeNode } from './tree'
 
 export interface TodoLink {
@@ -17,6 +18,8 @@ export interface TodoItem {
   checked: boolean
   /** Échéance « AAAA-MM-JJ », si elle existe. */
   due?: string
+  /** Répétition (la tâche se repousse au lieu de rester cochée). */
+  repeat?: Repeat
   toggle: () => void
 }
 
@@ -67,8 +70,15 @@ export function tasksOf(noteId: string): TodoItem[] {
     links: linksIn(el),
     checked: isChecked(el),
     due: isDueKey(el.getAttribute('due')) ? (el.getAttribute('due') as string) : undefined,
+    repeat: isRepeat(el.getAttribute('repeat')) ? (el.getAttribute('repeat') as Repeat) : undefined,
     // TipTap enregistre `checked` comme un booléen, que les types de Yjs ne prévoient pas.
-    toggle: () => (el as unknown as { setAttribute: (k: string, v: boolean) => void }).setAttribute('checked', !isChecked(el)),
+    toggle: () => {
+      const set = (el as unknown as { setAttribute: (k: string, v: unknown) => void }).setAttribute.bind(el)
+      const rep = el.getAttribute('repeat')
+      const due = el.getAttribute('due')
+      if (!isChecked(el) && isRepeat(rep) && isDueKey(due)) set('due', nextDue(due, rep))
+      else set('checked', !isChecked(el))
+    },
   }))
 }
 

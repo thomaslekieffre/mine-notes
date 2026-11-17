@@ -98,7 +98,7 @@ export function TodoOverview({ nodes, onOpen }: Props) {
                 <label key={`${g.node.id}-${i}`} className={t.checked ? 'todo-row done' : 'todo-row'}>
                   <input type="checkbox" checked={t.checked} onChange={() => t.toggle()} />
                   <span>{t.text || '(vide)'}</span>
-                  {!t.checked && <DueChip due={t.due} />}
+                  {!t.checked && <DueChip due={t.due} repeat={t.repeat} />}
                   {t.links.map((l, k) => {
                     const target = byId.get(l.id)
                     return (

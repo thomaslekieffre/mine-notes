@@ -52,5 +52,34 @@ export function nextMonday(): string {
   return dayKey(d)
 }
 
+export type Repeat = 'daily' | 'weekly' | 'monthly'
+export const REPEATS: Array<{ id: Repeat; label: string }> = [
+  { id: 'daily', label: 'Chaque jour' },
+  { id: 'weekly', label: 'Chaque semaine' },
+  { id: 'monthly', label: 'Chaque mois' },
+]
+export const isRepeat = (v: unknown): v is Repeat => v === 'daily' || v === 'weekly' || v === 'monthly'
+export const repeatLabel = (r: Repeat) => REPEATS.find((x) => x.id === r)?.label ?? ''
+
+function step(d: Date, repeat: Repeat) {
+  if (repeat === 'daily') d.setDate(d.getDate() + 1)
+  else if (repeat === 'weekly') d.setDate(d.getDate() + 7)
+  else {
+    const day = d.getDate()
+    d.setDate(1)
+    d.setMonth(d.getMonth() + 1)
+    d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()))
+  }
+}
+
+/** Prochaine échéance d'une tâche répétée : au moins un pas après l'ancienne, et toujours après aujourd'hui. */
+export function nextDue(due: string, repeat: Repeat): string {
+  const d = parse(due)
+  const today = parse(dayKey())
+  step(d, repeat)
+  for (let i = 0; i < 400 && d <= today; i++) step(d, repeat)
+  return dayKey(d)
+}
+
 /** Tri : en retard d'abord, puis par date, puis les tâches sans échéance. */
 export const byDue = (a?: string, b?: string) => (a && b ? a.localeCompare(b) : a ? -1 : b ? 1 : 0)

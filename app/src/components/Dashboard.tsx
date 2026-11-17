@@ -255,7 +255,7 @@ export function Dashboard({ nodes, onOpen, onOpenTodos, onToday, onNewNote, onQu
                   {t.text || '(vide)'}
                   {t.project && <small>{t.project.name}</small>}
                 </span>
-                <DueChip due={t.due} />
+                <DueChip due={t.due} repeat={t.repeat} />
                 {t.links.slice(0, 1).map((l, k) => {
                   const target = byId.get(l.id)
                   return (
