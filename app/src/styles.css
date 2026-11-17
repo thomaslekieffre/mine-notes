@@ -301,13 +301,18 @@ kbd { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--mu
 
 /* ───── Poignée de déplacement ───── */
 .drag-grip {
-  display: flex; align-items: center; justify-content: center; width: 26px; height: 32px; border-radius: 7px;
-  color: var(--muted); opacity: 0.75; background: transparent; border: 1px solid transparent; cursor: grab;
-  font-size: 17px; letter-spacing: -3px; user-select: none; transition: opacity 0.12s, background 0.12s;
+  display: flex; align-items: center; justify-content: center; width: 24px; height: 30px; border-radius: 7px;
+  color: var(--muted); opacity: 0.4; background: transparent; cursor: grab;
+  font-size: 16px; letter-spacing: -3px; user-select: none; transition: opacity 0.12s, background 0.12s;
 }
 .drag-grip:active { cursor: grabbing; }
 .ProseMirror-dropcursor { background: var(--accent) !important; height: 3px !important; border-radius: 2px; }
-.drag-grip:hover { opacity: 1; background: var(--active); color: var(--text); }
+.drag-grip:hover { opacity: 0.95; background: var(--active); color: var(--text); }
+
+/* Glisser un bloc sur le bord d'un autre : barre verticale qui annonce la mise en colonnes. */
+.side-target-left { box-shadow: -5px 0 0 0 var(--accent); }
+.side-target-right { box-shadow: 5px 0 0 0 var(--accent); }
+body.side-dropping .ProseMirror-dropcursor { display: none !important; }
 .ProseMirror-selectednode { outline: 2px solid color-mix(in srgb, var(--accent) 70%, transparent); outline-offset: 2px; border-radius: 6px; }
 
 /* ───── Menu « / » ───── */

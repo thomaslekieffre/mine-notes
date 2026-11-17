@@ -6,6 +6,7 @@ import { ImagePaste } from '../extensions/ImageBlock'
 import { MoveBlock } from '../extensions/MoveBlock'
 import { matches } from '../store/shortcuts'
 import { Search } from '../extensions/Search'
+import { SideDrop } from '../extensions/SideDrop'
 import { mathBridge } from '../extensions/mathBridge'
 import { SearchBar } from './SearchBar'
 import { Outline } from './Outline'
@@ -70,7 +71,7 @@ function Body({ node, crumbs, onStats, todoMode }: Props & { todoMode: boolean }
         Collaboration.configure({ document: doc, field: 'content' }),
         Placeholder.configure({ placeholder: 'Écris quelque chose… ou tape / pour insérer un bloc' }),
         ImagePaste,
-        ...(todoMode ? [] : [MoveBlock]),
+        ...(todoMode ? [] : [MoveBlock, SideDrop]),
         Search,
         SlashCommand.extend({ name: 'wikiLinkMenu' }).configure({
           char: '[[',

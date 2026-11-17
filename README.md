@@ -49,7 +49,7 @@
 
 - **Éditeur riche** (TipTap / ProseMirror) : titres, listes, tâches, tableaux, code, surlignage, polices, couleurs, tailles et un style « crayon gris ».
 - **Blocs personnalisés** : définition, exemple, exercice… et tes propres types, avec 21 couleurs ou une couleur libre. Un type peut être global ou réservé à un projet.
-- **Mise en page** : 2 ou 3 colonnes, solutions repliables, déplacement des blocs (glisser ou `Alt+↑/↓`).
+- **Mise en page** : 2 ou 3 colonnes (glisse un bloc sur le bord gauche ou droit d'un autre : les deux passent côte à côte, une troisième colonne s'ajoute en recommençant), solutions repliables, déplacement des blocs (glisser ou `Alt+↑/↓`).
 - **Maths et code** : formules saisies visuellement avec MathLive (`1/3` devient une fraction ; LaTeX possible), rendues par KaTeX, blocs de code colorés avec choix du langage, blocs repliables.
 - **Liens entre notes** : tape `[[` pour lier une note ; chaque note affiche les notes qui la mentionnent.
 - **Confort** : recherche et remplacement dans la note (`⌘F`), plan des titres, collage de Markdown, typographie française, emoji `:smile:`, temps de lecture.
