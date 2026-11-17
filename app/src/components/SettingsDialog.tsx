@@ -2,7 +2,7 @@ import { Icon } from './Icon'
 import { Mascot } from './Mascot'
 import { setPrefs, usePrefs } from '../store/prefs'
 import type { Prefs } from '../store/prefs'
-import { isTauri, openExternal } from '../store/platform'
+import { isMac, isTauri, openExternal, THIS_COMPUTER } from '../store/platform'
 import {
   SHORTCUTS,
   accelFromEvent,
@@ -64,7 +64,7 @@ function KeyRow({ def }: { def: ShortcutDef }) {
       e.stopPropagation()
       if (e.key === 'Escape') return setRec(false)
       const a = accelFromEvent(e)
-      if (!a) return setError('Ajoute ⌘, ⌃ ou ⌥ à la touche.')
+      if (!a) return setError(isMac ? 'Ajoute ⌘, ⌃ ou ⌥ à la touche.' : 'Ajoute Ctrl ou Alt à la touche.')
       const clash = setShortcut(def.id, a)
       if (clash) return setError(`Déjà utilisé par « ${clash.label} ».`)
       setError(null)
@@ -177,7 +177,7 @@ export function SettingsDialog({ theme, onTheme, onOpenData, onDemo, onClose }: 
           <h4>Données</h4>
           <div className="set-row">
             <span>
-              Sauvegarde, restauration{isTauri() ? ' et dossier sur ce Mac' : ''}
+              Sauvegarde, restauration{isTauri() ? ` et dossier sur ${THIS_COMPUTER}` : ''}
               <small>Tes notes restent sur cet appareil.</small>
             </span>
             <button type="button" className="btn" onClick={onOpenData}>

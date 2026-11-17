@@ -3,7 +3,7 @@ import { getMirrorPath, setMirrorPath, syncMirror } from '../store/mirror'
 import { Icon } from './Icon'
 import { createBackup, restoreBackup } from '../store/backup'
 import { exportMarkdownFull } from '../store/markdown'
-import { isTauri } from '../store/platform'
+import { isTauri, THIS_COMPUTER } from '../store/platform'
 import type { TreeNode } from '../store/tree'
 
 const fmt = (b: number) => (b > 1e6 ? `${(b / 1e6).toFixed(1)} Mo` : `${Math.max(1, Math.round(b / 1e3))} Ko`)
@@ -150,7 +150,7 @@ export function DataDialog({ nodes, onClose }: { nodes: TreeNode[]; onClose: () 
         </div>
         {isTauri() && (
           <>
-            <h4 className="data-sub">Dossier sur ce Mac</h4>
+            <h4 className="data-sub">Dossier sur {THIS_COMPUTER}</h4>
             <p>
               Choisis un dossier : Mine y recopie tes dossiers, projets et notes (en Markdown) et garde la copie à
               jour. Les blocs colorés deviennent des citations ; images et schémas restent seulement dans l'app.

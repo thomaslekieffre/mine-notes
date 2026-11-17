@@ -3,6 +3,7 @@ import { Icon } from './Icon'
 import { appendTask, appendText, createCapturedNote } from '../store/capture'
 import { ensureDailyNote } from '../store/tree'
 import { inDays, nextMonday } from '../store/dates'
+import { MOD } from '../store/platform'
 import type { TreeNode } from '../store/tree'
 
 export type QuickMode = 'note' | 'todo'
@@ -181,7 +182,7 @@ export function QuickCapture({ mode, nodes, onDone }: Props) {
               </option>
             ))}
           </select>
-          <span className="grow quick-hint">{mode === 'todo' ? '↩ ajouter · Échap fermer' : '⌘↩ enregistrer · Échap fermer'}</span>
+          <span className="grow quick-hint">{mode === 'todo' ? '↩ ajouter · Échap fermer' : `${MOD}↩ enregistrer · Échap fermer`}</span>
           <button type="button" className="btn primary" disabled={!canSave || busy} onClick={() => void save()}>
             {mode === 'todo' ? 'Ajouter' : 'Enregistrer'}
           </button>

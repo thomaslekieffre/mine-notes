@@ -23,3 +23,8 @@ export async function printPage() {
 
 /** Mac ? (sinon Windows ou Linux : Ctrl à la place de ⌘, barre de titre native). */
 export const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform || navigator.userAgent)
+
+/** Touche de commande affichée : ⌘ sur Mac, Ctrl+ ailleurs. */
+export const MOD = isMac ? '⌘' : 'Ctrl+'
+/** « ce Mac » ou « cet ordinateur » selon le système. */
+export const THIS_COMPUTER = isMac ? 'ce Mac' : 'cet ordinateur'

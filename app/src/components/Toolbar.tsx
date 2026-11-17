@@ -4,6 +4,7 @@ import { Icon } from './Icon'
 import type { IconName } from './Icon'
 import { pickImages } from '../extensions/ImageBlock'
 import { pretty, useShortcuts } from '../store/shortcuts'
+import { MOD } from '../store/platform'
 
 const FONTS = [
   { label: 'Inter', value: '' },
@@ -128,13 +129,13 @@ export function Toolbar({ editor, onToggleOutline, onToggleSearch, onPrint, onHi
       </select>
 
       <span className="tb-sep" />
-      <Btn label="Gras (⌘B)" active={s.bold} onClick={() => c().toggleBold().run()}>
+      <Btn label={`Gras (${MOD}B)`} active={s.bold} onClick={() => c().toggleBold().run()}>
         <b>B</b>
       </Btn>
-      <Btn label="Italique (⌘I)" active={s.italic} onClick={() => c().toggleItalic().run()}>
+      <Btn label={`Italique (${MOD}I)`} active={s.italic} onClick={() => c().toggleItalic().run()}>
         <i className="serif-i">I</i>
       </Btn>
-      <Btn label="Souligné (⌘U)" active={s.underline} onClick={() => c().toggleUnderline().run()}>
+      <Btn label={`Souligné (${MOD}U)`} active={s.underline} onClick={() => c().toggleUnderline().run()}>
         <u>U</u>
       </Btn>
       <Btn label="Barré" active={s.strike} onClick={() => c().toggleStrike().run()}>

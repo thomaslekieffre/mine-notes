@@ -272,7 +272,7 @@ export function Sidebar(props: Props) {
         <Icon name="home" style={{ color: 'var(--accent)', flexShrink: 0 }} />
         <span className="row-name">Accueil</span>
       </button>
-      <button type="button" className="row overview" style={{ margin: '0 6px 2px', paddingLeft: 8 }} onClick={props.onOpenToday} title="Note du jour (⌘D)">
+      <button type="button" className="row overview" style={{ margin: '0 6px 2px', paddingLeft: 8 }} onClick={props.onOpenToday} title="Note du jour">
         <span className="chev-space" />
         <Icon name="calendar" style={{ color: 'var(--ex)', flexShrink: 0 }} />
         <span className="row-name">Note du jour</span>
