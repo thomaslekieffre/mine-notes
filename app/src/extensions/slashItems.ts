@@ -49,6 +49,13 @@ export function buildSlashItems(types: BlockType[], manageTypes: () => void): Sl
       run: ({ editor, range }) => editor.chain().focus().deleteRange(range).insertColumns(3).run(),
     },
     {
+      id: 'embed',
+      label: 'Note intégrée',
+      hint: 'Affiche le contenu d’une autre note',
+      group: 'Mise en page',
+      run: ({ editor, range }) => editor.chain().focus().deleteRange(range).insertContent({ type: 'embed' }).run(),
+    },
+    {
       id: 'toc',
       label: 'Sommaire',
       hint: 'Liste des titres de la note',

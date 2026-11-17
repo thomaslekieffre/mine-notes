@@ -17,6 +17,7 @@ import { CodeBlock } from './CodeBlock'
 import { NoteLink } from './NoteLink'
 import { Tags } from './Tags'
 import { Toc } from './Toc'
+import { Embed } from './Embed'
 import { EmojiShortcodes } from './EmojiShortcodes'
 import { MarkdownPaste } from './MarkdownPaste'
 import { mathBridge } from './mathBridge'
@@ -42,6 +43,7 @@ export function buildExtensions(todo = false) {
     NoteLink,
     Tags,
     Toc,
+    Embed,
     Typography.configure({ openDoubleQuote: '« ', closeDoubleQuote: ' »' }),
     EmojiShortcodes,
     Markdown,
