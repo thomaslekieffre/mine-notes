@@ -281,8 +281,18 @@ export default function App() {
   // Première ouverture : on crée une fois le dossier de démonstration.
   useEffect(() => {
     if (ready) markLegacyDemo()
+    // Démo périmée (créée avant la v2) : on la remplace une fois, l'ancienne part à la corbeille.
+    if (ready && getFlag('demoCreated') && !getFlag('demoV2')) {
+      setFlag('demoV2')
+      void createDemo().then((id) => {
+        const note = getTreeNodes().find((n) => n.id === id)
+        if (note?.parentId) expand(note.parentId)
+      })
+      return
+    }
     if (!ready || getFlag('demoCreated')) return
     setFlag('demoCreated')
+    setFlag('demoV2')
     void createDemo().then((id) => {
       const note = getTreeNodes().find((n) => n.id === id)
       if (note?.parentId) expand(note.parentId)

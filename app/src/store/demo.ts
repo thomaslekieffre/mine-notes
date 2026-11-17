@@ -1,6 +1,6 @@
 import { getNoteDoc } from './notes'
 import { putMedia } from './media'
-import { addBlockType, createNode, getBlockTypes, markDemo, trashDemos } from './tree'
+import { addBlockType, createNode, getBlockTypes, markDemo, setFlag, trashDemos } from './tree'
 import { inDays } from './dates'
 import { MOD } from './platform'
 
@@ -104,6 +104,7 @@ export async function createDemo(): Promise<string> {
   trashDemos() // l'ancienne démo part à la corbeille : on la remplace
   const folder = createNode(null, 'folder', 'Démo Mine')
   markDemo(folder)
+  setFlag('demoV2')
   const main = createNode(folder, 'note', 'Démo : toutes les fonctionnalités')
   const todo = createNode(folder, 'note', 'Démo : une todo', 'todo')
   const detail = createNode(folder, 'note', 'Feature A (page détaillée)')
