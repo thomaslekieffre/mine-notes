@@ -25,12 +25,12 @@ Une fois ouverte, elle ressemble à un IDE (arborescence, onglets, palette de co
 | Liens | Liens entre notes (`[[`), liens entrants, pages créées à la volée depuis une tâche |
 | Capture rapide | Écrire une note ou ajouter une tâche depuis n'importe quelle app du Mac |
 | Sécurité | Corbeille avec restauration, sauvegarde complète, dossier miroir sur le disque |
-| Appareils | Mac perso, Mac pro, iPhone ; pas de stylet ; Windows possible (non testé) |
+| Appareils | Mac perso, Mac pro, iPhone ; pas de stylet ; Windows possible |
 | Données | 100 % chez soi (homelab), jamais de cloud tiers, fonctionne hors ligne |
 
 ## 3. Choix techniques
 
-- **Base web** : TypeScript + React, livrée en PWA (iPhone) et en app Mac via Tauri à la fin.
+- **Base web** : TypeScript + React, livrée en PWA (iPhone) et en app Mac via Tauri.
 - **Éditeur** : TipTap (ProseMirror) avec nœuds personnalisés pour les blocs.
 - **Colonnes** : nœud TipTap personnalisé « rangée » contenant 2 ou 3 « colonnes », chacune pouvant recevoir n'importe quel bloc ; sur iPhone les colonnes s'empilent.
 - **Projets** : un projet est un dossier spécial de l'arborescence, créé depuis un modèle (sous-dossiers/notes Todo, Idées, Journal préremplis), avec sa propre icône.
@@ -93,9 +93,9 @@ Accueil (tableau de bord, statistiques d'écriture), historique des versions d'u
 
 ### Reste à faire
 
-- **Release** : pousser, poser le tag `v…`, vérifier que le workflow construit bien Mac et Windows, tester l'app sous Windows.
-- **Non testé dans la fenêtre native** : notifications de rappel, dictée vocale (WKWebView / WebView2), raccourcis globaux, impression PDF, bloc Kanban et note intégrée.
-- **Idées écartées ou non faites** : diagrammes Mermaid (abandonné), minuteur Pomodoro (abandonné), graphe des liens, modèles de notes, cartes de révision, mode concentration, objectif de mots, import Markdown / Obsidian, chiffrement.
+- **Release** : pousser, poser le tag `v…` à chaque nouvelle version.
+- **Non testé dans la fenêtre native** : notifications de rappel, dictée vocale (WKWebView / WebView2), impression PDF, bloc Kanban et note intégrée.
+- **Idées écartées ou non faites** : diagrammes Mermaid (écartée), minuteur Pomodoro (écartée), graphe des liens, modèles de notes, cartes de révision, mode concentration, objectif de mots, import Markdown / Obsidian, chiffrement.
 - **Limites connues** : une tâche récurrente perd l'historique de ses cochages ; la note intégrée est en lecture seule et n'affiche pas ses propres notes intégrées ; le rappel exige que l'app soit ouverte ; fermer la fenêtre sur Mac laisse l'app vivre sans fenêtre (un clic sur le Dock ne la rouvre pas encore).
 - **Plus tard** : jalon E (synchronisation homelab + PWA iPhone).
 
@@ -122,4 +122,4 @@ Code : `app/` (Vite + React + TypeScript + TipTap + Yjs + Tauri). Lancer : `cd a
 
 ## 7. Prochaine étape
 
-Finir la mise en ligne : pousser, tag de la première release, vérification des installeurs (Mac et Windows). Ensuite, au choix : corriger la réouverture de la fenêtre depuis le Dock, sync homelab, ou une des idées non faites. Règles de travail : un commit par fonctionnalité, version à changer à chaque livraison (`npm run set-version`).
+Finir la mise en ligne : pousser, tag de la première release, vérification des installeurs (Mac et Windows). Ensuite : corriger la réouverture de la fenêtre depuis le Dock, sync homelab, ou une des idées non faites. Règles de travail : un commit par fonctionnalité, version à changer à chaque livraison (`npm run set-version`).
